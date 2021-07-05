@@ -1,27 +1,39 @@
 #!/bin/python
-import requests
+import requests, time, json
 from bs4 import BeautifulSoup
 from selenium import webdriver
 # Site to download clips: https://clipr.xyz/ 
 
-# Get url of 20+ valorant clips
-# Individual links found within the hr
-# clipsList = []
-# clipsUrl = 'https://www.twitch.tv/directory/game/VALORANT/clips?range=7d'
-# clipsUrlText = requests.get(clipsUrl).text
-# print(clipsUrlText)
-print("Hello")
+# Get url of 20 valorant clips
+# """Without loading dynamic content the following code pulls
+# the url of 20 clips. If more clips are needed, make the selenium webdriver 
+# scroll to the bottom of the page to load dynamic content"""
+clipsList = []
+clipsUrl = 'https://www.twitch.tv/directory/game/VALORANT/clips?range=7d'
+driver = webdriver.Firefox(executable_path='./geckodriver')
 
-# driver = webdriver.Firefox()
-# driver.get('http://eve-central.com/home/quicklook.html?typeid=34')
+driver.get(clipsUrl)
+time.sleep(5)
+html = driver.page_source
+driver.close()
 
-# html = driver.page_source
-# soup = BeautifulSoup(html)
+soup = BeautifulSoup(html, 'html.parser')
 
-# # check out the docs for the kinds of things you can do with 'find_all'
-# # this (untested) snippet should find tags with a specific class ID
-# # see: http://www.crummy.com/software/BeautifulSoup/bs4/doc/#searching-by-css-class
-# for tag in soup.find_all("a", class_="my_class"):
-#     print tag.text
+for link in soup.find_all('a'):
+    if '/clip/' in link.get('href'):
+        clipsList.append('twitch.tv' + link.get('href'))
+            
+# Remove duplicate links
+clipsList = list(dict.fromkeys(clipsList))
 
+# GETTING A LIST OF CLIP URLS COMPLETE
+print('*' * 20 + 'program finished' + '*' * 20)
+print(f'Here is the list of clips:\n {clipsList}')
+print(len(clipsList))
+for item in clipsList:
+    print(item)
+
+# Get credentials for Twitch api from file
+with open('confidential.json', 'r') as fp:
+    credentials = json.load(fp)
 
