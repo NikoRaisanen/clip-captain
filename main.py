@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 # Site to download clips: https://clipr.xyz/ 
 
+credentials = []
 # Get url of 20 valorant clips
 # """Without loading dynamic content the following code pulls
 # the url of 20 clips. If more clips are needed, make the selenium webdriver 
@@ -55,3 +56,10 @@ startDate = startDate + "Z"
 # Example of startDate variable:
 # 2021-06-28T10:53:47Z
 # Use startData var for started_at query parameter for twitch clip api calls
+
+clipsAPI = 'https://api.twitch.tv/helix/clips'
+PARAMS = {'game_id': 516575, 'started_at': '2021-06-30T10:49:29Z'}
+HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
+r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
+data = r.json()
+print(data)
