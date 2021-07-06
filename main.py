@@ -30,8 +30,8 @@ startDate = startDate + "Z"
 # 2021-06-28T10:53:47Z
 # Use startData var for started_at query parameter for twitch clip api calls
 
-clipDownloadLinks = []
-clipUrls = []
+clipInfo = []
+finalClipInfo = []
 clipsAPI = 'https://api.twitch.tv/helix/clips'
 PARAMS = {'game_id': 516575, 'started_at': '2021-06-30T10:49:29Z'}
 HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
@@ -42,12 +42,28 @@ print(type(data))
 
 # Get link to download each video and put into list
 for entry in data['data']:
-    clipDownloadLinks.append(entry['thumbnail_url'])
+    clipInfo.append([entry['thumbnail_url'], entry['broadcaster_name'], entry['game_id']])
 
-print(clipDownloadLinks)
-print(len(clipDownloadLinks))
+print(clipInfo)
+print(len(clipInfo))
 
-for link in clipDownloadLinks:
-    clipUrls.append(link.split('-preview-')[0] + '.mp4')
-    
-print(clipUrls)
+for link in clipInfo:
+    finalClipInfo.append([link[0].split('-preview-')[0] + '.mp4', link[1], link[2]])
+
+print(finalClipInfo)
+
+# Downloads clips within the below for loop
+# [0] is download url
+# [1] is streamer name
+# [2] is game id
+counter = 0    
+for entry in finalClipInfo:
+    if entry[2] == '516575':
+        filename = 'Valorant' + 'Clip' + str(counter) + '.mp4'
+        counter += 1
+    else:
+        filename = 'Unknown' + 'Clip' + str(counter) + '.mp4'
+
+    r = requests.get(entry[0], allow_redirects=True)
+    with open('./clips/' + filename, 'wb') as fp:
+        fp.write(r.content)

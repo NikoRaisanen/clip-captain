@@ -139,3 +139,4 @@ cython_debug/
 
 # Private stuff, credentials, etc.
 confidential.json
+.clips/
