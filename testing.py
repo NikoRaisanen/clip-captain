@@ -14,8 +14,8 @@ flow = InstalledAppFlow.from_client_secrets_file(
     'client_secret.json',
     scopes=SCOPES)
 
-flow.run_local_server()
-credentials = flow.run_console()
+credentials = flow.run_local_server()
+# credentials = flow.run_console()
 
 print('before building service')
 service = build(API_NAME, API_VERSION, credentials=credentials)

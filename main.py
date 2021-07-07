@@ -67,10 +67,10 @@ def download_clips(clips):
 def combine_clips(clips):
     videoObjects = []
     for clip in clips:
-        video = VideoFileClip('clips/' + clip, target_resolution=(1920,1080))
+        video = VideoFileClip('clips/' + clip, target_resolution=(1080,1920))
         videoObjects.append(video)
 
-    transition = VideoFileClip('tvstatictransition.mp4')
+    transition = VideoFileClip('tvstatictransition.mp4').fx(afx.volumex, 0.5)
     transition = transition.subclip(0, -1)
     final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
     final.write_videofile('final.mp4', fps=60, bitrate="6000k")
