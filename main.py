@@ -72,8 +72,10 @@ def combine_clips(clips):
 
     transition = VideoFileClip('tvstatictransition.mp4').fx(afx.volumex, 0.5)
     transition = transition.subclip(0, -1)
+    # video name based on game
+    videoName = clips[0].split('Clip')[0] + '.mp4'
     final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
-    final.write_videofile('final.mp4', fps=60, bitrate="6000k")
+    final.write_videofile(videoName, fps=60, bitrate="6000k")
 
 def main():
     # BEGIN GETTING + DOWNLOADING CLIPS
