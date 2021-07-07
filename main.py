@@ -1,8 +1,8 @@
 #!/bin/python
-import requests, time, json, pprint
+import requests, time, json, pprint, os
 from datetime import datetime, timedelta
-from bs4 import BeautifulSoup
-from selenium import webdriver
+from moviepy.editor import *
+
 # Site to download clips: https://clipr.xyz/ 
 
 # Get url of 20 valorant clips
@@ -58,10 +58,20 @@ def download_clips(clips):
         else:
             filename = 'Unknown' + 'Clip' + str(counter) + '.mp4'
 
+        print(f'Downloading clip {counter} of {len(clips)}')
         r = requests.get(entry[0], allow_redirects=True)
         with open('./clips/' + filename, 'wb') as fp:
             fp.write(r.content)
+# takes list of clips and combines them
+def combine_clips(clips):
+    videoObjects = []
+    for clip in clips:
+        video = VideoFileClip('clips/' + clip)
+        video.resize(1920, 1080)
+        videoObjects.append(video)
 
+    final = concatenate_videoclips(videoObjects)
+    final.write_videofile('final.mp4', fps=30)
 
 def main():
     # BEGIN GETTING + DOWNLOADING CLIPS
@@ -71,7 +81,7 @@ def main():
     # END GETTING + DOWNLOADING CLIPS
 
     # BEGIN JOINING CLIPS TOGETHER
-
+    combine_clips(os.listdir('clips'))
 
 if __name__ == "__main__":
     main()
