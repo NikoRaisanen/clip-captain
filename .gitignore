@@ -141,3 +141,4 @@ cython_debug/
 confidential.json
 .clips/
 final.mp4
+client_secret.json
