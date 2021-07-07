@@ -142,3 +142,4 @@ confidential.json
 .clips/
 final.mp4
 client_secret.json
+CREDENTIALS_PICKLE_FILE
