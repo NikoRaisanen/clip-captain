@@ -1,4 +1,5 @@
 #!/bin/python
+from types import MethodDescriptorType
 import requests, time, json, pprint, os
 from datetime import datetime, timedelta
 from moviepy.editor import *
@@ -67,11 +68,10 @@ def combine_clips(clips):
     videoObjects = []
     for clip in clips:
         video = VideoFileClip('clips/' + clip)
-        video.resize(1920, 1080)
         videoObjects.append(video)
 
-    final = concatenate_videoclips(videoObjects)
-    final.write_videofile('final.mp4', fps=30)
+    final = concatenate_videoclips(videoObjects, method='compose')
+    final.write_videofile('final.mp4', fps=60)
 
 def main():
     # BEGIN GETTING + DOWNLOADING CLIPS
@@ -82,6 +82,7 @@ def main():
 
     # BEGIN JOINING CLIPS TOGETHER
     combine_clips(os.listdir('clips'))
-
+    # Read about compose method on line 30:
+    # https://github.com/Zulko/moviepy/blob/master/moviepy/video/compositing/concatenate.py
 if __name__ == "__main__":
     main()
