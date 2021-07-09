@@ -1,9 +1,18 @@
 #!/bin/python
-import requests, time, json, pprint, os
+import requests, json, os
 from datetime import datetime, timedelta
 from moviepy.editor import *
+from googleapiclient.http import MediaFileUpload
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+import pickle
+import os
+import socket
+
 
 # Get url of 20 valorant clips
+# BEGIN CLIP PROCUREMENT, DOWNLOAD, AND COMBINING
 
 def get_credentials():
     with open('confidential.json', 'r') as fp:
@@ -94,23 +103,80 @@ def combine_clips(clips, game):
     # final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
     final.write_videofile(videoName, fps=60, bitrate="6000k")
 
-def main():
-    # BEGIN GETTING + DOWNLOADING CLIPS
-    credentials = get_credentials()
-    clips = get_clip_info(credentials)
-    # ^ From here and above there is download link, streamer name, game id 
-    game = download_clips(clips)
-    print(f'Here is the game: {game}')
-    # END GETTING + DOWNLOADING CLIPS
+    # END CLIP PROCUREMENT, DOWNLOAD, AND COMBINING
+    # BEGIN UPLOAD TO YOUTUBE
+def get_authenticated_service():    
+    CLIENT_SECRET_FILE = 'client_secret2.json'
+    API_NAME = 'youtube'
+    API_VERSION = 'v3'
+    SCOPES = 'https://www.googleapis.com/auth/youtube.upload'
 
-    # Join clips together, writes an mp4 file in the cwd
-    allClips = os.listdir('clips')
-    combine_clips(allClips[0:2], game)
-    fonts = TextClip.list('font')
-    print(fonts)
-    # for font in fonts:
-    #     print(font)
-    # Read about compose method on line 30:
-    # https://github.com/Zulko/moviepy/blob/master/moviepy/video/compositing/concatenate.py
+    # Use pickle file if it exists
+    if os.path.exists("CREDENTIALS_PICKLE_FILE"):
+            with open("CREDENTIALS_PICKLE_FILE", 'rb') as f:
+                credentials = pickle.load(f)
+
+    # Otherwise authenticate user and create pickle file
+    else:
+        flow = InstalledAppFlow.from_client_secrets_file(
+            CLIENT_SECRET_FILE,
+            scopes=SCOPES)
+        credentials = flow.run_local_server()
+        with open("CREDENTIALS_PICKLE_FILE", 'wb') as f:
+                pickle.dump(credentials, f)
+
+    service = build(API_NAME, API_VERSION, credentials=credentials)
+    return service
+
+def upload_video(service):
+    request_body = {
+        'snippet': {
+            'title': 'Full Montage Upload',
+            'categoryID': '20',
+            'description': 'my desc',
+            'tags': ['valorant', 'viking', 'gaming'],
+            'defaultLanguage': 'en'
+        },
+        'status': {
+            'privacyStatus': 'private',
+            'selfDeclaredMadeForKids': False
+        },
+        'notifySubscribers': False
+    }
+
+    mediaFile = MediaFileUpload('Valorant.mp4')
+    # Increase socket default timemout due to connection dropping during large file uploads
+
+
+    print(f'Uploading video with the following information...\n{request_body}')
+    response_upload = service.videos().insert(
+        part = 'snippet,status',
+        body = request_body,
+        media_body = mediaFile
+    ).execute()
+    service.thumbnails().set(
+        videoId=response_upload.get('id'),
+        media_body=MediaFileUpload('thumbnail1.jpg')
+    ).execute()
+
+    # END UPLOAD TO YOUTUBE
+
+def main():
+    socket.setdefaulttimeout(100000)
+    # # BEGIN GETTING + DOWNLOADING CLIPS
+    # credentials = get_credentials()
+    # clips = get_clip_info(credentials)
+    # # ^ From here and above there is download link, streamer name, game id 
+    # game = download_clips(clips)
+    # print(f'This video is about: {game}')
+    # # END GETTING + DOWNLOADING CLIPS
+
+    # # Join clips together, writes an mp4 file in the cwd
+    # allClips = os.listdir('clips')
+    # combine_clips(allClips, game)
+    youtube = get_authenticated_service()
+    upload_video(youtube)
+
+
 if __name__ == "__main__":
     main()
