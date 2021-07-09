@@ -48,14 +48,19 @@ def download_clips(clips):
     # [0] is download url
     # [1] is streamer name
     # [2] is game id
+    # fullInfo list contains: download url, streamer name, game id, 
+    fullInfo = []
     streamers = []
-    counter = 0    
+    counter = 0
+    game = ''    
     for entry in clips:
         if entry[2] == '516575':
-            filename = 'Valorant' + 'Clip' + str(counter) + '.mp4'
+            filename = 'Valorant' + entry[1] + 'Clip' + str(counter) + '.mp4'
             counter += 1
+            game = 'Valorant'
         else:
-            filename = 'Unknown' + 'Clip' + str(counter) + '.mp4'
+            filename = 'Unknown' + entry[1] + 'Clip' + str(counter) + '.mp4'
+            game = 'Unknown'
 
         print(f'Downloading clip {counter} of {len(clips)}')
         r = requests.get(entry[0], allow_redirects=True)
@@ -65,16 +70,18 @@ def download_clips(clips):
         streamers.append(entry[1])
         # Return list of streamer names (give credit in youtube description)
         # Set conversion used to remove duplicates
-    return list(set(streamers))
+    return game
 
 # takes list of clips and combines them
-def combine_clips(clips):
+def combine_clips(clips, game):
     videoObjects = []
     for clip in clips:
         # Add text below:
+        streamerName = clip.split(game)[1].split('Clip')[0]
+        
         video = VideoFileClip('clips/' + clip, target_resolution=(1080,1920))
-        txt_clip = TextClip("Chronodotafan123", fontsize = 60, color = 'white',stroke_color='black',stroke_width=2, font="Fredoka-One")
-        txt_clip = txt_clip.set_pos((0.7, 0.85), relative=True).set_duration(video.duration)
+        txt_clip = TextClip(streamerName, fontsize = 60, color = 'white',stroke_color='black',stroke_width=2, font="Fredoka-One")
+        txt_clip = txt_clip.set_pos((0.8, 0.9), relative=True).set_duration(video.duration)
         video = CompositeVideoClip([video, txt_clip]).set_duration(video.duration)
         videoObjects.append(video)
 
@@ -82,22 +89,23 @@ def combine_clips(clips):
     transition = VideoFileClip('tvstatictransition.mp4').fx(afx.volumex, 0.5)
     transition = transition.subclip(0, -1)
     # video name based on game
-    videoName = clips[0].split('Clip')[0] + '.mp4'
+    videoName = game + '.mp4'
     final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
     # final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
     final.write_videofile(videoName, fps=60, bitrate="6000k")
 
 def main():
     # BEGIN GETTING + DOWNLOADING CLIPS
-    # credentials = get_credentials()
-    # clips = get_clip_info(credentials)
-    # streamers = download_clips(clips)
-    # print(f'Here are the streamers featured in this weeks episode: {streamers}')
+    credentials = get_credentials()
+    clips = get_clip_info(credentials)
+    # ^ From here and above there is download link, streamer name, game id 
+    game = download_clips(clips)
+    print(f'Here is the game: {game}')
     # END GETTING + DOWNLOADING CLIPS
 
     # Join clips together, writes an mp4 file in the cwd
     allClips = os.listdir('clips')
-    combine_clips(allClips[0:2])
+    combine_clips(allClips[0:2], game)
     fonts = TextClip.list('font')
     print(fonts)
     # for font in fonts:
