@@ -5,12 +5,12 @@ from moviepy.editor import *
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
+from datetime import datetime
 
+from google.auth.transport.requests import Request
 import pickle
 import os
 import socket
-
-
 # Get url of 20 valorant clips
 # BEGIN CLIP PROCUREMENT, DOWNLOAD, AND COMBINING
 
@@ -58,15 +58,17 @@ def download_clips(clips):
     # [1] is streamer name
     # [2] is game id
     # fullInfo list contains: download url, streamer name, game id, 
-    fullInfo = []
-    streamers = []
     counter = 0
+    streamers = []
     game = ''    
     for entry in clips:
         if entry[2] == '516575':
             filename = 'Valorant' + entry[1] + 'Clip' + str(counter) + '.mp4'
             counter += 1
             game = 'Valorant'
+        elif entry[2] == '32982':
+            filename = 'GTAV' + entry[1] + 'Clip' + str(counter) + '.mp4'
+            game = 'GTAV'
         else:
             filename = 'Unknown' + entry[1] + 'Clip' + str(counter) + '.mp4'
             game = 'Unknown'
@@ -79,7 +81,7 @@ def download_clips(clips):
         streamers.append(entry[1])
         # Return list of streamer names (give credit in youtube description)
         # Set conversion used to remove duplicates
-    return game
+    return game, streamers
 
 # takes list of clips and combines them
 def combine_clips(clips, game):
@@ -102,20 +104,25 @@ def combine_clips(clips, game):
     final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
     # final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
     final.write_videofile(videoName, fps=60, bitrate="6000k")
+    return videoName
 
     # END CLIP PROCUREMENT, DOWNLOAD, AND COMBINING
+
+
     # BEGIN UPLOAD TO YOUTUBE
 def get_authenticated_service():    
-    CLIENT_SECRET_FILE = 'client_secret2.json'
+    CLIENT_SECRET_FILE = 'client_secret.json'
     API_NAME = 'youtube'
     API_VERSION = 'v3'
-    SCOPES = 'https://www.googleapis.com/auth/youtube.upload'
-
+    SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
+    credentials = ''
     # Use pickle file if it exists
     if os.path.exists("CREDENTIALS_PICKLE_FILE"):
             with open("CREDENTIALS_PICKLE_FILE", 'rb') as f:
                 credentials = pickle.load(f)
-
+    if not credentials or not credentials.valid:
+        if credentials and credentials.expired and credentials.refresh_token:
+            credentials.refresh(Request())
     # Otherwise authenticate user and create pickle file
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
@@ -126,15 +133,23 @@ def get_authenticated_service():
                 pickle.dump(credentials, f)
 
     service = build(API_NAME, API_VERSION, credentials=credentials)
+    # print('Here are the credentials for authentication:\n' + credentials)
     return service
 
-def upload_video(service):
+def upload_video(service, game, streamers, videoName, thumbnail):
+    streamers = list(set(streamers))
+    streamerCredit = ''
+    for streamer in streamers:
+        streamer = "https://www.twitch.tv/" + streamer
+        streamerCredit = streamerCredit + "\n" + streamer
+
+    description = f'{game} Top Moments #5\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send me an email at valorantvikingclips@gmail.com'
     request_body = {
         'snippet': {
-            'title': 'Full Montage Upload',
-            'categoryID': '20',
-            'description': 'my desc',
-            'tags': ['valorant', 'viking', 'gaming'],
+            'title': f'{game} Top Moments #5',
+            'categoryId': '20',
+            'description': description,
+            'tags': ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage'],
             'defaultLanguage': 'en'
         },
         'status': {
@@ -144,7 +159,7 @@ def upload_video(service):
         'notifySubscribers': False
     }
 
-    mediaFile = MediaFileUpload('Valorant.mp4')
+    mediaFile = MediaFileUpload(videoName)
     # Increase socket default timemout due to connection dropping during large file uploads
 
 
@@ -156,26 +171,34 @@ def upload_video(service):
     ).execute()
     service.thumbnails().set(
         videoId=response_upload.get('id'),
-        media_body=MediaFileUpload('thumbnail1.jpg')
+        media_body=MediaFileUpload(thumbnail)
     ).execute()
 
+    print('Upload complete!')
     # END UPLOAD TO YOUTUBE
 
 def main():
+    beginTime = datetime.now()
     socket.setdefaulttimeout(100000)
     # # BEGIN GETTING + DOWNLOADING CLIPS
     # credentials = get_credentials()
     # clips = get_clip_info(credentials)
     # # ^ From here and above there is download link, streamer name, game id 
-    # game = download_clips(clips)
+    # game, streamers = download_clips(clips)
     # print(f'This video is about: {game}')
+    # print(f'Here are the streamers: {streamers}')
     # # END GETTING + DOWNLOADING CLIPS
 
     # # Join clips together, writes an mp4 file in the cwd
     # allClips = os.listdir('clips')
-    # combine_clips(allClips, game)
+    # videoName = combine_clips(allClips, game)
+    videoName = 'Valorant.mp4'
+    game = 'Valorant'
+    streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
     youtube = get_authenticated_service()
-    upload_video(youtube)
+    upload_video(youtube, game, streamers, videoName, 'thumbnail1.jpg')
+    endTime = datetime.now()
+    print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
 
 if __name__ == "__main__":

@@ -139,7 +139,7 @@ cython_debug/
 
 # Private stuff, credentials, etc.
 confidential.json
-.clips/
+/clips/*.mp4
 final.mp4
 Valorant.mp4
 client_secret.json
