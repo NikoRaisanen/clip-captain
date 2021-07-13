@@ -139,9 +139,10 @@ cython_debug/
 
 # Private stuff, credentials, etc.
 confidential.json
-/clips/*.mp4
-final.mp4
-Valorant.mp4
+/clips/Valorant/*.mp4
+/clips/GTAV/*.mp4
+/clips/Just Chatting/*.mp4
+/finalVideos/*.mp4
 client_secret.json
 client_secret2.json
 CREDENTIALS_PICKLE_FILE

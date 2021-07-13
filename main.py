@@ -67,6 +67,8 @@ def download_clips(clips, game_id):
         game = 'Valorant'
     elif game_id == '32982':
         game = 'GTAV'
+    elif game_id == '509658':
+        game = 'Just Chatting'
     else:
         game = 'Unknown'  
     
@@ -102,14 +104,14 @@ def combine_clips(clips, game):
         videoObjects.append(video)
 
     # Make transition clip 1 second long and halve the volume
-    transition = VideoFileClip('tvstatictransition.mp4').fx(afx.volumex, 0.5)
+    transition = VideoFileClip('assets/tvstatictransition.mp4').fx(afx.volumex, 0.5)
     transition = transition.subclip(0, -1)
     # video name based on game
     videoName = game + '.mp4'
     final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
     # final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
-    final.write_videofile(videoName, fps=60, bitrate="6000k")
-    return videoName
+    final.write_videofile(os.path.join(os.getcwd(), 'finalVideos', videoName), fps=60, bitrate="6000k")
+    return os.path.join(os.getcwd(), 'finalVideos', videoName)
 
     # END CLIP PROCUREMENT, DOWNLOAD, AND COMBINING
 
@@ -148,10 +150,10 @@ def upload_video(service, game, streamers, videoName, thumbnail):
         streamer = "https://www.twitch.tv/" + streamer
         streamerCredit = streamerCredit + "\n" + streamer
 
-    description = f'{game} Top Moments #5\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send me an email at valorantvikingclips@gmail.com'
+    description = f'{game} Upload Test\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send me an email at valorantvikingclips@gmail.com'
     request_body = {
         'snippet': {
-            'title': f'{game} Top Moments #5',
+            'title': f'{game} Upload Test',
             'categoryId': '20',
             'description': description,
             'tags': ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage'],
@@ -163,9 +165,9 @@ def upload_video(service, game, streamers, videoName, thumbnail):
         },
         'notifySubscribers': False
     }
-
     mediaFile = MediaFileUpload(videoName)
     # Increase socket default timemout due to connection dropping during large file uploads
+    print(f'Uploading the following file: {videoName}')
 
 
     print(f'Uploading video with the following information...\n{request_body}')
@@ -183,14 +185,16 @@ def upload_video(service, game, streamers, videoName, thumbnail):
     # END UPLOAD TO YOUTUBE
 
 def main():
+    socket.setdefaulttimeout(100000)
     # Twitch game names mapped to game id for get_clip_info() function
+    JUSTCHATTING = '509658'
     VALORANT = '516575'
     GTAV = '32982'
     beginTime = datetime.now()
-    socket.setdefaulttimeout(100000)
+    # socket.setdefaulttimeout(100000)
     # BEGIN GETTING + DOWNLOADING CLIPS
     credentials = get_credentials()
-    clips, gameId = get_clip_info(credentials, GTAV)
+    clips, gameId = get_clip_info(credentials, JUSTCHATTING)
     # ^ From here and above there is download link, streamer name, game id 
     streamers, gameName = download_clips(clips, gameId)
     print(f'This video is about: {gameName}')
@@ -199,15 +203,15 @@ def main():
 
     # Join clips together, writes an mp4 file in the cwd
     allClips = os.listdir(downloadPath)
-    # for item in allClips:
-    #     item = os.path.join(downloadPath, item)
     print(f'Searching for clips in directory {downloadPath}...\nWe found {allClips}')
-    videoName = combine_clips(allClips, gameName)
+    # videoName = combine_clips(allClips, gameName)
+    videoName = 'Just Chatting.mp4'
+    videoName = os.path.join(os.getcwd(), 'finalVideos', videoName)
     # videoName = 'Valorant.mp4'
     # game = 'Valorant'
     # streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
     youtube = get_authenticated_service()
-    upload_video(youtube, gameName, streamers, videoName, 'thumbnail2.jpg')
+    upload_video(youtube, gameName, streamers, videoName, 'assets/valorantTN1.jpg')
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
