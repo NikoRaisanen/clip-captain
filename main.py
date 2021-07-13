@@ -19,7 +19,7 @@ def get_credentials():
         credentials = json.load(fp)
         return credentials
 
-def get_clip_info(credentials):
+def get_clip_info(credentials, game_id, pastDays=7):
     # Get current time in RFC3339 format with T and Z
     timeNow = datetime.now().isoformat()
     timeNow = timeNow.split('.')[0]
@@ -27,7 +27,7 @@ def get_clip_info(credentials):
     timeNow = datetime.strptime(timeNow, '%Y-%m-%dT%H:%M:%SZ')
 
     # Subtract current time by 7 days to get startDate (lower bounds of date to look for clips)
-    startDate = timeNow - timedelta(days=7)
+    startDate = timeNow - timedelta(pastDays)
     startDate = startDate.isoformat()
     startDate = startDate + "Z"
     # Example of startDate variable:
@@ -38,7 +38,7 @@ def get_clip_info(credentials):
     clipInfo = []
     finalClipInfo = []
     clipsAPI = 'https://api.twitch.tv/helix/clips'
-    PARAMS = {'game_id': 516575, 'started_at': startDate}
+    PARAMS = {'game_id': game_id, 'started_at': startDate}
     HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
     r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
     data = r.json()
@@ -50,9 +50,9 @@ def get_clip_info(credentials):
     for link in clipInfo:
         finalClipInfo.append([link[0].split('-preview-')[0] + '.mp4', link[1], link[2]])
 
-    return finalClipInfo
+    return finalClipInfo, game_id
 
-def download_clips(clips):
+def download_clips(clips, game_id):
     # Downloads clips within the below for loop
     # [0] is download url
     # [1] is streamer name
@@ -60,28 +60,33 @@ def download_clips(clips):
     # fullInfo list contains: download url, streamer name, game id, 
     counter = 0
     streamers = []
-    game = ''    
-    for entry in clips:
-        if entry[2] == '516575':
-            filename = 'Valorant' + entry[1] + 'Clip' + str(counter) + '.mp4'
-            counter += 1
-            game = 'Valorant'
-        elif entry[2] == '32982':
-            filename = 'GTAV' + entry[1] + 'Clip' + str(counter) + '.mp4'
-            game = 'GTAV'
-        else:
-            filename = 'Unknown' + entry[1] + 'Clip' + str(counter) + '.mp4'
-            game = 'Unknown'
+    game = ''
 
-        print(f'Downloading clip {counter} of {len(clips)}')
+    basePath = os.path.join(os.getcwd(), 'clips')
+    if game_id == '516575':
+        game = 'Valorant'
+    elif game_id == '32982':
+        game = 'GTAV'
+    else:
+        game = 'Unknown'  
+    
+    global downloadPath
+    downloadPath = os.path.join(basePath, game)
+    if not os.path.exists(downloadPath):
+        os.mkdir(downloadPath)
+
+    for entry in clips:
+        filename = game + entry[1] + 'Clip' + str(counter) + '.mp4'
         r = requests.get(entry[0], allow_redirects=True)
-        with open('./clips/' + filename, 'wb') as fp:
+        with open(os.path.join(downloadPath, filename), 'wb') as fp:
             fp.write(r.content)
+            print(f'Downloading clip {str(counter + 1)} of {len(clips)} to {os.path.join(downloadPath, filename)}')
 
         streamers.append(entry[1])
-        # Return list of streamer names (give credit in youtube description)
-        # Set conversion used to remove duplicates
-    return game, streamers
+        counter += 1
+        # Return list of streamer names (give credit in youtube description
+    print(f'Finished downloading {counter} clips for {game}!')
+    return streamers, game
 
 # takes list of clips and combines them
 def combine_clips(clips, game):
@@ -90,7 +95,7 @@ def combine_clips(clips, game):
         # Add text below:
         streamerName = clip.split(game)[1].split('Clip')[0]
         
-        video = VideoFileClip('clips/' + clip, target_resolution=(1080,1920))
+        video = VideoFileClip(os.path.join(downloadPath, clip), target_resolution=(1080,1920))
         txt_clip = TextClip(streamerName, fontsize = 60, color = 'white',stroke_color='black',stroke_width=2, font="Fredoka-One")
         txt_clip = txt_clip.set_pos((0.8, 0.9), relative=True).set_duration(video.duration)
         video = CompositeVideoClip([video, txt_clip]).set_duration(video.duration)
@@ -178,25 +183,31 @@ def upload_video(service, game, streamers, videoName, thumbnail):
     # END UPLOAD TO YOUTUBE
 
 def main():
+    # Twitch game names mapped to game id for get_clip_info() function
+    VALORANT = '516575'
+    GTAV = '32982'
     beginTime = datetime.now()
     socket.setdefaulttimeout(100000)
-    # # BEGIN GETTING + DOWNLOADING CLIPS
-    # credentials = get_credentials()
-    # clips = get_clip_info(credentials)
-    # # ^ From here and above there is download link, streamer name, game id 
-    # game, streamers = download_clips(clips)
-    # print(f'This video is about: {game}')
-    # print(f'Here are the streamers: {streamers}')
-    # # END GETTING + DOWNLOADING CLIPS
+    # BEGIN GETTING + DOWNLOADING CLIPS
+    credentials = get_credentials()
+    clips, gameId = get_clip_info(credentials, GTAV)
+    # ^ From here and above there is download link, streamer name, game id 
+    streamers, gameName = download_clips(clips, gameId)
+    print(f'This video is about: {gameName}')
+    print(f'Here are the streamers: {streamers}')
+    # END GETTING + DOWNLOADING CLIPS
 
-    # # Join clips together, writes an mp4 file in the cwd
-    # allClips = os.listdir('clips')
-    # videoName = combine_clips(allClips, game)
-    videoName = 'Valorant.mp4'
-    game = 'Valorant'
-    streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
+    # Join clips together, writes an mp4 file in the cwd
+    allClips = os.listdir(downloadPath)
+    # for item in allClips:
+    #     item = os.path.join(downloadPath, item)
+    print(f'Searching for clips in directory {downloadPath}...\nWe found {allClips}')
+    videoName = combine_clips(allClips, gameName)
+    # videoName = 'Valorant.mp4'
+    # game = 'Valorant'
+    # streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
     youtube = get_authenticated_service()
-    upload_video(youtube, game, streamers, videoName, 'thumbnail1.jpg')
+    upload_video(youtube, gameName, streamers, videoName, 'thumbnail2.jpg')
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
