@@ -127,9 +127,9 @@ def get_authenticated_service():
     if os.path.exists("CREDENTIALS_PICKLE_FILE"):
             with open("CREDENTIALS_PICKLE_FILE", 'rb') as f:
                 credentials = pickle.load(f)
-    if not credentials or not credentials.valid:
-        if credentials and credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
+            if not credentials or not credentials.valid:
+                if credentials and credentials.expired and credentials.refresh_token:
+                    credentials.refresh(Request())
     # Otherwise authenticate user and create pickle file
     else:
         flow = InstalledAppFlow.from_client_secrets_file(
@@ -143,30 +143,72 @@ def get_authenticated_service():
     # print('Here are the credentials for authentication:\n' + credentials)
     return service
 
+def get_vid_number(game):
+    vidNumber = 0
+    games = ['Valorant', 'GTAV', 'Just Chatting']
+    with open('videoCounter.txt', 'r') as fp:
+        counts = []
+        data = fp.readlines()
+        for item in data:
+            number = item.split(':')[1].strip()
+            counts.append(number)
+
+    # List containing number of vids created for each game
+    if game == 'Valorant':
+        vidNumber = counts[0]
+        counts[0] = int(counts[0]) + 1
+    elif game == 'GTAV':
+        vidNumber = counts[1]
+        counts[1] = int(counts[1]) + 1
+    elif game == 'Just Chatting':
+        vidNumber = counts[2]
+        counts[2] = int(counts[2]) + 1
+
+    newFile = ''
+    for i in range(len(games)):
+        newFile = newFile + f'{games[i]}: {counts[i]}\n'
+
+
+    with open('videoCounter.txt', 'w') as fp:
+        fp.write(newFile)
+
+    return vidNumber
+
 def upload_video(service, game, streamers, videoName, thumbnail):
+    vidNumber = get_vid_number(game)
+    videoTitle = ''
+    if game == 'Valorant':
+        videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
+    # WHEN EXPANDING TO GTAV COME UP WITH TITLE + VID NUMBER
+    elif game == 'GTAV':
+        videoTitle = 'First GTAV Video'
+    elif game == 'Just Chatting':
+        videoTitle = f'Most Popular JUST CHATTING Clips of the Week #{vidNumber}'
+    else:
+        videoTitle = 'PLACEHOLDER VIDEO TITLE' 
+
     streamers = list(set(streamers))
     streamerCredit = ''
     for streamer in streamers:
         streamer = "https://www.twitch.tv/" + streamer
         streamerCredit = streamerCredit + "\n" + streamer
 
-    description = f'{game} Upload Test\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send me an email at valorantvikingclips@gmail.com'
+    description = f'{videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send us an email at valorantvikingclips@gmail.com'
     request_body = {
         'snippet': {
-            'title': f'{game} Upload Test',
+            'title': f'{game} Top Moments #1 | Best Clips of the Week',
             'categoryId': '20',
             'description': description,
-            'tags': ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage'],
+            'tags': ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch'],
             'defaultLanguage': 'en'
         },
         'status': {
-            'privacyStatus': 'private',
+            'privacyStatus': 'public',
             'selfDeclaredMadeForKids': False
         },
         'notifySubscribers': False
     }
     mediaFile = MediaFileUpload(videoName)
-    # Increase socket default timemout due to connection dropping during large file uploads
     print(f'Uploading the following file: {videoName}')
 
 
@@ -185,16 +227,16 @@ def upload_video(service, game, streamers, videoName, thumbnail):
     # END UPLOAD TO YOUTUBE
 
 def main():
+    # Increase socket default timemout due to connection dropping during large file uploads
     socket.setdefaulttimeout(100000)
     # Twitch game names mapped to game id for get_clip_info() function
     JUSTCHATTING = '509658'
     VALORANT = '516575'
     GTAV = '32982'
     beginTime = datetime.now()
-    # socket.setdefaulttimeout(100000)
     # BEGIN GETTING + DOWNLOADING CLIPS
     credentials = get_credentials()
-    clips, gameId = get_clip_info(credentials, JUSTCHATTING)
+    clips, gameId = get_clip_info(credentials, VALORANT)
     # ^ From here and above there is download link, streamer name, game id 
     streamers, gameName = download_clips(clips, gameId)
     print(f'This video is about: {gameName}')
@@ -204,11 +246,10 @@ def main():
     # Join clips together, writes an mp4 file in the cwd
     allClips = os.listdir(downloadPath)
     print(f'Searching for clips in directory {downloadPath}...\nWe found {allClips}')
-    # videoName = combine_clips(allClips, gameName)
-    videoName = 'Just Chatting.mp4'
-    videoName = os.path.join(os.getcwd(), 'finalVideos', videoName)
-    # videoName = 'Valorant.mp4'
-    # game = 'Valorant'
+    videoName = combine_clips(allClips, gameName)
+    # videoName = os.path.join(os.getcwd(), 'finalVideos', videoName)
+    # videoName = os.path.join(os.getcwd(), 'finalVideos','Valorant.mp4')
+    # gameName = 'Valorant'
     # streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
     youtube = get_authenticated_service()
     upload_video(youtube, gameName, streamers, videoName, 'assets/valorantTN1.jpg')
