@@ -49,7 +49,7 @@ def get_clip_info(credentials, game_id, pastDays=7):
     # Convert thumbnail_url to download link and create list with download link, broadcaster_name, game_id
     for link in clipInfo:
         finalClipInfo.append([link[0].split('-preview-')[0] + '.mp4', link[1], link[2]])
-
+    print('done getting clip info')
     return finalClipInfo, game_id
 
 def download_clips(clips, game_id):
@@ -177,15 +177,20 @@ def get_vid_number(game):
 def upload_video(service, game, streamers, videoName, thumbnail):
     vidNumber = get_vid_number(game)
     videoTitle = ''
+    tags = []
     if game == 'Valorant':
         videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
+        tags = ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch']
     # WHEN EXPANDING TO GTAV COME UP WITH TITLE + VID NUMBER
     elif game == 'GTAV':
         videoTitle = 'First GTAV Video'
+        tags = ['first GTAV tags']
     elif game == 'Just Chatting':
         videoTitle = f'Most Popular JUST CHATTING Clips of the Week #{vidNumber}'
+        tags = ['twitch', 'justchatting', 'just chatting', 'twitch 2021', 'twitch july', 'twitch streamers', 'twitch funny', 'best of twitch']
     else:
         videoTitle = 'PLACEHOLDER VIDEO TITLE' 
+        tags = ['placeholder tags']
 
     streamers = list(set(streamers))
     streamerCredit = ''
@@ -196,10 +201,10 @@ def upload_video(service, game, streamers, videoName, thumbnail):
     description = f'{videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send us an email at valorantvikingclips@gmail.com'
     request_body = {
         'snippet': {
-            'title': f'{game} Top Moments #1 | Best Clips of the Week',
+            'title': videoTitle,
             'categoryId': '20',
             'description': description,
-            'tags': ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch'],
+            'tags': tags,
             'defaultLanguage': 'en'
         },
         'status': {
@@ -227,6 +232,7 @@ def upload_video(service, game, streamers, videoName, thumbnail):
     # END UPLOAD TO YOUTUBE
 
 def main():
+    print('Starting program...')
     # Increase socket default timemout due to connection dropping during large file uploads
     socket.setdefaulttimeout(100000)
     # Twitch game names mapped to game id for get_clip_info() function
@@ -235,8 +241,10 @@ def main():
     GTAV = '32982'
     beginTime = datetime.now()
     # BEGIN GETTING + DOWNLOADING CLIPS
+    print('getting credentials')
     credentials = get_credentials()
-    clips, gameId = get_clip_info(credentials, VALORANT)
+    print('getting clip info')
+    clips, gameId = get_clip_info(credentials, JUSTCHATTING)
     # ^ From here and above there is download link, streamer name, game id 
     streamers, gameName = download_clips(clips, gameId)
     print(f'This video is about: {gameName}')
@@ -252,7 +260,7 @@ def main():
     # gameName = 'Valorant'
     # streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
     youtube = get_authenticated_service()
-    upload_video(youtube, gameName, streamers, videoName, 'assets/valorantTN1.jpg')
+    upload_video(youtube, gameName, streamers, videoName, 'assets/JustChattingTN1.jpg')
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
