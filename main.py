@@ -69,6 +69,8 @@ def download_clips(clips, game_id):
         game = 'GTAV'
     elif game_id == '509658':
         game = 'Just Chatting'
+    elif game_id == '509659':
+        game = 'ASMR'
     else:
         game = 'Unknown'  
     
@@ -95,7 +97,7 @@ def combine_clips(clips, game):
     videoObjects = []
     for clip in clips:
         # Add text below:
-        streamerName = clip.split(game)[1].split('Clip')[0]
+        streamerName = clip[len(game):].split('Clip')[0]
         
         video = VideoFileClip(os.path.join(downloadPath, clip), target_resolution=(1080,1920))
         txt_clip = TextClip(streamerName, fontsize = 60, color = 'white',stroke_color='black',stroke_width=2, font="Fredoka-One")
@@ -145,7 +147,7 @@ def get_authenticated_service():
 
 def get_vid_number(game):
     vidNumber = 0
-    games = ['Valorant', 'GTAV', 'Just Chatting']
+    games = ['Valorant', 'GTAV', 'Just Chatting', 'ASMR']
     with open('videoCounter.txt', 'r') as fp:
         counts = []
         data = fp.readlines()
@@ -163,6 +165,9 @@ def get_vid_number(game):
     elif game == 'Just Chatting':
         vidNumber = counts[2]
         counts[2] = int(counts[2]) + 1
+    elif game == 'ASMR':
+        vidNumber = counts[3]
+        counts[3] = int(counts[3]) + 1
 
     newFile = ''
     for i in range(len(games)):
@@ -174,13 +179,17 @@ def get_vid_number(game):
 
     return vidNumber
 
-def upload_video(service, game, streamers, videoName, thumbnail):
+def upload_video(service, game, streamers, videoName, thumbnail = None):
     vidNumber = get_vid_number(game)
     videoTitle = ''
+    email = ''
     tags = []
+    # if thumbnail = None, do auto generation
+    # Format for autoTN is: gameName.lowercase() + "TN" + vidNumber + ".jpg" IF IT EXISTS
     if game == 'Valorant':
         videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
         tags = ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch']
+        email = 'valorantvikingclips@gmail.com'
     # WHEN EXPANDING TO GTAV COME UP WITH TITLE + VID NUMBER
     elif game == 'GTAV':
         videoTitle = 'First GTAV Video'
@@ -188,9 +197,23 @@ def upload_video(service, game, streamers, videoName, thumbnail):
     elif game == 'Just Chatting':
         videoTitle = f'Most Popular JUST CHATTING Clips of the Week #{vidNumber}'
         tags = ['twitch', 'justchatting', 'just chatting', 'twitch 2021', 'twitch july', 'twitch streamers', 'twitch funny', 'best of twitch']
+        email = 'theholyfishmoley@gmail.com'
+    elif game == 'ASMR':
+        videoTitle = f'🍑💦 Best of Twitch ASMR Week #{vidNumber}'
+        tags = ['twitch', 'asmr', 'twitch asmr', 'asmr of the week', 'ear licking asmr', 'twitch girl', 'asmr compilation', 'twitch wardrobe malfunction']
+        email = 'theholyfishmoley@gmail.com'
     else:
         videoTitle = 'PLACEHOLDER VIDEO TITLE' 
         tags = ['placeholder tags']
+        email = 'the contact information found on our about page'
+
+    # If no thumbnail, use auto-generated thumbnail. Else, use provided thumbnail
+    if not thumbnail:
+        filename = f'{game.casefold()}TN{vidNumber}.jpg'
+        thumbnail = os.path.join(os.getcwd(), 'assets', filename)
+    else:
+        pass
+
 
     streamers = list(set(streamers))
     streamerCredit = ''
@@ -198,7 +221,7 @@ def upload_video(service, game, streamers, videoName, thumbnail):
         streamer = "https://www.twitch.tv/" + streamer
         streamerCredit = streamerCredit + "\n" + streamer
 
-    description = f'{videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send us an email at valorantvikingclips@gmail.com'
+    description = f'{videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send us an email at {email}'
     request_body = {
         'snippet': {
             'title': videoTitle,
@@ -239,6 +262,7 @@ def main():
     JUSTCHATTING = '509658'
     VALORANT = '516575'
     GTAV = '32982'
+    ASMR = '509659'
     beginTime = datetime.now()
     # BEGIN GETTING + DOWNLOADING CLIPS
     print('getting credentials')
@@ -260,7 +284,7 @@ def main():
     # gameName = 'Valorant'
     # streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
     youtube = get_authenticated_service()
-    upload_video(youtube, gameName, streamers, videoName, 'assets/JustChattingTN1.jpg')
+    upload_video(youtube, gameName, streamers, videoName)
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
