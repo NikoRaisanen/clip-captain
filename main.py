@@ -211,6 +211,7 @@ def upload_video(service, game, streamers, videoName, thumbnail = None):
     if not thumbnail:
         filename = f'{game.casefold()}TN{vidNumber}.jpg'
         thumbnail = os.path.join(os.getcwd(), 'assets', filename)
+        print(f'Using {thumbnail} as thumbnail for this video!')
     else:
         pass
 
