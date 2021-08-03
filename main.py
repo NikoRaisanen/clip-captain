@@ -19,7 +19,7 @@ def get_credentials():
         credentials = json.load(fp)
         return credentials
 
-def get_clip_info(credentials, game_id, pastDays=7):
+def get_clip_info(credentials, game_id, pastDays=7, first = 20, cursor = None, language = 'en'):
     # Get current time in RFC3339 format with T and Z
     timeNow = datetime.now().isoformat()
     timeNow = timeNow.split('.')[0]
@@ -35,21 +35,38 @@ def get_clip_info(credentials, game_id, pastDays=7):
     # Use startData var for started_at query parameter for twitch clip api calls
 
     # Call twitch api to get thumbnail url, broadcaster name, game id
+    counter = 0
     clipInfo = []
     finalClipInfo = []
-    clipsAPI = 'https://api.twitch.tv/helix/clips'
-    PARAMS = {'game_id': game_id, 'started_at': startDate}
-    HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
-    r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
-    data = r.json()
 
-    for entry in data['data']:
-        clipInfo.append([entry['thumbnail_url'], entry['broadcaster_name'], entry['game_id']])
+    # Keep paginating through twitch clips API until 20 valid clips
+    while len(clipInfo) < 20:
+        counter += 1
+        print(f'Iteration #{counter}')
+        clipsAPI = 'https://api.twitch.tv/helix/clips'
+        PARAMS = {'game_id': game_id, 'started_at': startDate, 'first': first, 'after': cursor}
+        HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
+        r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
+        data = r.json()
 
+        # Keep going through results until 20 clips in spanish are acquired
+        if language[:2] == 'es':
+            cursor = data['pagination']['cursor']
+            for item in data['data']:
+                if item['language'][:2] == 'es':
+                    clipInfo.append([item['thumbnail_url'], item['broadcaster_name'], item['game_id']])
+        # Take the top 20 clips returned by clips api
+        else:
+            for item in data['data']:
+                clipInfo.append([item['thumbnail_url'], item['broadcaster_name'], item['game_id']])
+
+        # cursor = data['pagination']['cursor']
     # Convert thumbnail_url to download link and create list with download link, broadcaster_name, game_id
     for link in clipInfo:
         finalClipInfo.append([link[0].split('-preview-')[0] + '.mp4', link[1], link[2]])
     print('done getting clip info')
+    print(clipInfo)
+    print(len(clipInfo))
     return finalClipInfo, game_id
 
 def download_clips(clips, game_id):
@@ -145,17 +162,27 @@ def get_authenticated_service():
     # print('Here are the credentials for authentication:\n' + credentials)
     return service
 
-def get_vid_number(game):
+def get_vid_number(game, language):
     vidNumber = 0
     games = ['Valorant', 'GTAV', 'Just Chatting', 'ASMR']
-    with open('videoCounter.txt', 'r') as fp:
-        counts = []
-        data = fp.readlines()
-        for item in data:
-            number = item.split(':')[1].strip()
-            counts.append(number)
 
-    # List containing number of vids created for each game
+    if language == 'en':
+        with open('videoCounter.txt', 'r') as fp:
+            counts = []
+            data = fp.readlines()
+            for item in data:
+                number = item.split(':')[1].strip()
+                counts.append(number)
+
+    elif language == 'es':
+        with open('videoCounterES.txt', 'r') as fp:
+            counts = []
+            data = fp.readlines()
+            for item in data:
+                number = item.split(':')[1].strip()
+                counts.append(number)
+
+    # Get the vidNumber of the current video, and add 1 for next time script runs
     if game == 'Valorant':
         vidNumber = counts[0]
         counts[0] = int(counts[0]) + 1
@@ -179,29 +206,52 @@ def get_vid_number(game):
 
     return vidNumber
 
-def upload_video(service, game, streamers, videoName, thumbnail = None):
-    vidNumber = get_vid_number(game)
+def upload_video(service, game, streamers, videoName, thumbnail = None, language='en'):
+    vidNumber = get_vid_number(game, language)
     videoTitle = ''
     email = ''
     tags = []
     # if thumbnail = None, do auto generation
     # Format for autoTN is: gameName.lowercase() + "TN" + vidNumber + ".jpg" IF IT EXISTS
     if game == 'Valorant':
-        videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
-        tags = ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch']
-        email = 'valorantvikingclips@gmail.com'
+        if language == 'en':
+            videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
+            tags = ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch']
+            email = 'valorantvikingclips@gmail.com'
+        elif language == 'es':
+            videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
+            tags = ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch']
+            email = 'valorantvikingclips@gmail.com'
     # WHEN EXPANDING TO GTAV COME UP WITH TITLE + VID NUMBER
+    # CHANGE CONTENT IN SPANISH ELIF
     elif game == 'GTAV':
-        videoTitle = 'First GTAV Video'
-        tags = ['first GTAV tags']
+        if language == 'en':
+            videoTitle = 'First GTAV Video'
+            tags = ['first GTAV tags']
+        elif language == 'es':
+            videoTitle = 'First GTAV Video'
+            tags = ['first GTAV tags']
+
     elif game == 'Just Chatting':
-        videoTitle = f'Most Popular JUST CHATTING Clips of the Week #{vidNumber}'
-        tags = ['twitch', 'justchatting', 'just chatting', 'twitch 2021', 'twitch july', 'twitch streamers', 'twitch funny', 'best of twitch']
-        email = 'theholyfishmoley@gmail.com'
+        if language == 'en':
+            videoTitle = f'Most Popular JUST CHATTING Clips of the Week #{vidNumber}'
+            tags = ['twitch', 'justchatting', 'just chatting', 'twitch 2021', 'twitch july', 'twitch streamers', 'twitch funny', 'best of twitch']
+            email = 'theholyfishmoley@gmail.com'
+        elif language == 'es':
+            videoTitle = f'Most Popular JUST CHATTING Clips of the Week #{vidNumber}'
+            tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'just chatting', 'asmr']
+            email = 'carnedeoveja737@gmail.com'
+
     elif game == 'ASMR':
-        videoTitle = f'🍑💦 Best of Twitch ASMR Week #{vidNumber}'
-        tags = ['twitch', 'asmr', 'twitch asmr', 'asmr of the week', 'ear licking asmr', 'twitch girl', 'asmr compilation', 'twitch wardrobe malfunction']
-        email = 'theholyfishmoley@gmail.com'
+        if language == 'en':
+            videoTitle = f'🍑💦 Best of Twitch ASMR Week #{vidNumber}'
+            tags = ['twitch', 'asmr', 'twitch asmr', 'asmr of the week', 'ear licking asmr', 'twitch girl', 'asmr compilation', 'twitch wardrobe malfunction']
+            email = 'theholyfishmoley@gmail.com'
+        elif language == 'es':
+            videoTitle = f'🍑💦 Best of Twitch ASMR Week #{vidNumber}'
+            tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'just chatting', 'asmr']
+            email = 'carnedeoveja737@gmail.com'
+
     else:
         videoTitle = 'PLACEHOLDER VIDEO TITLE' 
         tags = ['placeholder tags']
@@ -259,6 +309,7 @@ def main():
     print('Starting program...')
     # Increase socket default timemout due to connection dropping during large file uploads
     socket.setdefaulttimeout(100000)
+    videoLanguage = 'es'
     # Twitch game names mapped to game id for get_clip_info() function
     JUSTCHATTING = '509658'
     VALORANT = '516575'
@@ -269,7 +320,7 @@ def main():
     print('getting credentials')
     credentials = get_credentials()
     print('getting clip info')
-    clips, gameId = get_clip_info(credentials, JUSTCHATTING)
+    clips, gameId = get_clip_info(credentials, ASMR, language=videoLanguage)
     # ^ From here and above there is download link, streamer name, game id 
     streamers, gameName = download_clips(clips, gameId)
     print(f'This video is about: {gameName}')
@@ -285,7 +336,7 @@ def main():
     # gameName = 'Valorant'
     # streamers = ['niko', 'chronoo', 'timethetatman', 'tenz']
     youtube = get_authenticated_service()
-    upload_video(youtube, gameName, streamers, videoName)
+    upload_video(youtube, gameName, streamers, videoName, language=videoLanguage)
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
