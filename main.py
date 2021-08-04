@@ -38,6 +38,7 @@ def get_clip_info(credentials, game_id, pastDays=7, first = 20, cursor = None, l
     counter = 0
     clipInfo = []
     finalClipInfo = []
+    previousClips = []
 
     # Keep paginating through twitch clips API until 20 valid clips
     while len(clipInfo) < 20:
@@ -53,12 +54,16 @@ def get_clip_info(credentials, game_id, pastDays=7, first = 20, cursor = None, l
         if language[:2] == 'es':
             cursor = data['pagination']['cursor']
             for item in data['data']:
-                if item['language'][:2] == 'es':
+                # Add clip to list if language is Spanish AND broadcaster_name + clip title combination is unique
+                if item['language'][:2] == 'es' and previousClips.count([item['broadcaster_name'], item['title']]) == 0:
                     clipInfo.append([item['thumbnail_url'], item['broadcaster_name'], item['game_id']])
+                    previousClips.append([item['broadcaster_name'], item['title']])
         # Take the top 20 clips returned by clips api
         else:
             for item in data['data']:
-                clipInfo.append([item['thumbnail_url'], item['broadcaster_name'], item['game_id']])
+                if previousClips.count([item['broadcaster_name'], item['title']]) == 0:
+                    clipInfo.append([item['thumbnail_url'], item['broadcaster_name'], item['game_id']])
+                    previousClips.append([item['broadcaster_name'], item['title']])
 
         # cursor = data['pagination']['cursor']
     # Convert thumbnail_url to download link and create list with download link, broadcaster_name, game_id
