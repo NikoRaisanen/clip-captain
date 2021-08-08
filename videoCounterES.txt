@@ -1,4 +1,5 @@
 Valorant: 1
 GTAV: 1
-Just Chatting: 1
+Just Chatting: 2
 ASMR: 1
+PHB: 1
