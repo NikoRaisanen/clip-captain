@@ -19,7 +19,7 @@ def get_credentials():
         credentials = json.load(fp)
         return credentials
 
-def get_clip_info(credentials, game_id, pastDays=7, first = 20, cursor = None, language = 'en'):
+def get_clip_info(credentials, game_id, pastDays=7, first = 50, cursor = None, language = 'en'):
     print(f'Language to be used is {language}')
     # Get current time in RFC3339 format with T and Z
     timeNow = datetime.now().isoformat()
@@ -55,7 +55,16 @@ def get_clip_info(credentials, game_id, pastDays=7, first = 20, cursor = None, l
 
         # Keep going through results until 20 clips in spanish are acquired
         if language[:2] == 'es':
-            cursor = data['pagination']['cursor']
+            try:
+                if data['pagination']['cursor']:
+                    cursor = data['pagination']['cursor']
+                else:
+                    print('executing else block, and breaking')
+                    break
+            except KeyError:
+                print('Keyerror found, attempting to break out of loop')
+                break
+
             for item in data['data']:
                 # Add clip to list if language is Spanish AND broadcaster_name + clip title combination is unique
                 if item['language'][:2] == 'es' and previousClips.count([item['broadcaster_name'], item['title']]) == 0 and 'vtube' not in item['broadcaster_name'].casefold():
@@ -271,7 +280,7 @@ def upload_video(service, game, streamers, videoName, thumbnail = None, language
             tags = ['twitch', 'asmr', 'twitch asmr', 'asmr of the week', 'ear licking asmr', 'twitch girl', 'asmr compilation', 'twitch wardrobe malfunction']
             email = 'theholyfishmoley@gmail.com'
         elif language == 'es':
-            videoTitle = f'🍑💦 Los Mejores Videos de ASMR Twitch #{vidNumber}'
+            videoTitle = f'🍑💦 ASMR en Español | Los Mejores Videos de ASMR Twitch #{vidNumber}'
             tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'just chatting', 'asmr']
             email = 'carnedeoveja737@gmail.com'
 
@@ -281,8 +290,8 @@ def upload_video(service, game, streamers, videoName, thumbnail = None, language
             tags = ['twitch', 'justchatting', 'hot tub', 'pool', 'swimsuit twitch', 'twitch beach', 'twitch girl', 'twitch thot', 'twitch pool', 'amouranth']
             email = 'theholyfishmoley@gmail.com'
         elif language == 'es':
-            videoTitle = f'Los Mejores Clips de Twitch Español Just Chatting #{vidNumber}'
-            tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'just chatting', 'asmr']
+            videoTitle = f'🍑💦 Mujeres de Twitch Español | Hot Tubs Piscinas y Playas #{vidNumber}'
+            tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'playa', 'piscina']
             email = 'carnedeoveja737@gmail.com'
 
     else:
@@ -362,7 +371,7 @@ def main():
     print('getting credentials')
     credentials = get_credentials()
     print('getting clip info')
-    clips, gameId = get_clip_info(credentials, ASMR, language=videoLanguage)
+    clips, gameId = get_clip_info(credentials, PHB, language=videoLanguage)
     streamers, gameName = download_clips(clips, gameId)
     print(f'This video is about: {gameName}')
     print(f'Here are the streamers: {streamers}')
@@ -372,6 +381,8 @@ def main():
     allClips = os.listdir(downloadPath)
     print(f'Searching for clips in directory {downloadPath}...\nWe found {allClips}')
     videoName = combine_clips(allClips, gameName)
+    # get_authenticated_service takes one of the following inputs:
+    # carnedeoveja737, valorantvikingclips, theholyfishmoley
     youtube = get_authenticated_service()
     upload_video(youtube, gameName, streamers, videoName, language=videoLanguage)
     endTime = datetime.now()
