@@ -108,6 +108,8 @@ def download_clips(clips, game_id):
         game = 'ASMR'
     elif game_id == '116747788':
         game = 'PHB'
+    elif game_id == '29595':
+        game = 'Dota'
     else:
         game = 'Unknown'  
     
@@ -162,15 +164,16 @@ def combine_clips(clips, game):
 
 
     # BEGIN UPLOAD TO YOUTUBE
-def get_authenticated_service():    
+def get_authenticated_service(account):    
     CLIENT_SECRET_FILE = 'client_secret.json'
     API_NAME = 'youtube'
     API_VERSION = 'v3'
     SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
     credentials = ''
+    filename = account + "_PICKLE"
     # Use pickle file if it exists
-    if os.path.exists("CREDENTIALS_PICKLE_FILE"):
-            with open("CREDENTIALS_PICKLE_FILE", 'rb') as f:
+    if os.path.exists(filename):
+            with open(filename, 'rb') as f:
                 credentials = pickle.load(f)
             if not credentials or not credentials.valid:
                 if credentials and credentials.expired and credentials.refresh_token:
@@ -181,7 +184,7 @@ def get_authenticated_service():
             CLIENT_SECRET_FILE,
             scopes=SCOPES)
         credentials = flow.run_local_server()
-        with open("CREDENTIALS_PICKLE_FILE", 'wb') as f:
+        with open(filename, 'wb') as f:
                 pickle.dump(credentials, f)
 
     service = build(API_NAME, API_VERSION, credentials=credentials)
@@ -258,8 +261,9 @@ def upload_video(service, game, streamers, videoName, thumbnail = None, language
     # CHANGE CONTENT IN SPANISH ELIF
     elif game == 'GTAV':
         if language == 'en':
-            videoTitle = 'First GTAV Video'
-            tags = ['first GTAV tags']
+            videoTitle = f'GTA V Clips of the Week #{vidNumber} | GTA 5 RP Highlights'
+            tags = ['Twitch', 'gta 5', 'gta rp', 'roleplay', 'gta roleplay', 'twitch gta', 'gta v', 'gta highlights']
+            email = 'valorantvikingclips@gmail.com'
         elif language == 'es':
             videoTitle = 'First GTAV Video'
             tags = ['first GTAV tags']
@@ -294,6 +298,9 @@ def upload_video(service, game, streamers, videoName, thumbnail = None, language
             tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'playa', 'piscina']
             email = 'carnedeoveja737@gmail.com'
 
+    elif game == 'Dota':
+            videoTitle = f'Top Dota 2 CLips of the Week {vidNumber} | Twitch Highlights'
+            tags = ['first GTAV tags']
     else:
         videoTitle = 'PLACEHOLDER VIDEO TITLE' 
         tags = ['placeholder tags']
@@ -359,19 +366,20 @@ def main():
     # Increase socket default timemout due to connection dropping during large file uploads
     socket.setdefaulttimeout(100000)
 
-    videoLanguage = 'es'
+    videoLanguage = 'en'
     # Twitch game names mapped to game id for get_clip_info() function
     JUSTCHATTING = '509658'
     VALORANT = '516575'
     GTAV = '32982'
     ASMR = '509659'
     PHB = '116747788'
+    DOTA = '29595'
 
     # BEGIN GETTING + DOWNLOADING CLIPS
     print('getting credentials')
     credentials = get_credentials()
     print('getting clip info')
-    clips, gameId = get_clip_info(credentials, PHB, language=videoLanguage)
+    clips, gameId = get_clip_info(credentials, DOTA, language=videoLanguage)
     streamers, gameName = download_clips(clips, gameId)
     print(f'This video is about: {gameName}')
     print(f'Here are the streamers: {streamers}')
@@ -383,7 +391,7 @@ def main():
     videoName = combine_clips(allClips, gameName)
     # get_authenticated_service takes one of the following inputs:
     # carnedeoveja737, valorantvikingclips, theholyfishmoley
-    youtube = get_authenticated_service()
+    youtube = get_authenticated_service('valorantvikingclips')
     upload_video(youtube, gameName, streamers, videoName, language=videoLanguage)
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
