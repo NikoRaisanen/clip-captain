@@ -14,23 +14,30 @@ import socket
 
 # Data structure for the final video, used to populate information in Youtube Upload API
 class VideoObj:
-    def __init__(self, gameName, filename, videoTitle, thumbnail, tags, description, streamers=[]):
+    def __init__(self, gameName, filename, videoTitle, thumbnail, tags, description, privacyStatus, streamers=[]):
         self.gameName = gameName
         self.filename = filename
         self.videoTitle = videoTitle
         self.streamers = streamers
         self.thumbnail = thumbnail
         self.tags = tags
-        self.desription = description
+        self.description = description
+        self.privacyStatus = privacyStatus
     
     def __str__(self):
         return f'{self.gameName}\n{self.filename}\n{self.videoTitle}\n{self.thumbnail}\n{self.tags}\n{self.desription}\n{self.streamers}'
 
     def unique_streamers(self):
         self.streamers = list(set(self.streamers))
-        
-    def explain_self(self):
-        print(self.gameId, self.videoName, self.streamers, self.thumbnail)
+    
+    def set_default_description(self):
+        streamerCredit = ''
+        for streamer in self.streamers:
+            streamer = "https://www.twitch.tv/" + streamer
+            streamerCredit = streamerCredit + "\n" + streamer
+
+        self.description = f'{self.videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}'
+            
 
 # Data structure for each individual clip
 class Clip:
@@ -61,12 +68,11 @@ def get_game_id(gameName, credentials):
         gameId = data['data'][0]['id']
         Clip.gameName = gameName
 
-
     return gameId
 
 # game_id, pastDays, numClips, language <-- all vars declared on program start
 def get_clip_info(credentials, game_id, pastDays=7, numClips = 20, first = 50, cursor = None, language =None):
-    print(f'Language to be used is {language}')
+    print(f'Language to be used is: {language}')
     # Get current time in RFC3339 format with T and Z
     timeNow = datetime.now().isoformat()
     timeNow = timeNow.split('.')[0]
@@ -82,15 +88,13 @@ def get_clip_info(credentials, game_id, pastDays=7, numClips = 20, first = 50, c
     # Use startData var for started_at query parameter for twitch clip api calls
 
     # Call twitch api to get thumbnail url, broadcaster name, game id
-    counter = 0
+    counter = 1
     clips = []
 
 
     # Keep paginating through twitch clips API until 20 valid clips
     while len(clips) < numClips:
-        print(f'Iteration #{counter}')
-        print(clips)
-        print(len(clips))
+        print(f'Query #{counter} for valid clips')
         clipsAPI = 'https://api.twitch.tv/helix/clips'
         PARAMS = {'game_id': game_id, 'started_at': startDate, 'first': first, 'after': cursor}
         HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
@@ -132,7 +136,7 @@ def download_clips(clips, videoStruct):
         os.mkdir(downloadPath)
 
     # Create Video Object and define required attributes
-    vidFileName = Clip.gameName + '.mp4'
+    # vidFileName = Clip.gameName + '.mp4'
 
     for clip in clips:
         r = requests.get(clip.downloadLink, allow_redirects=True)
@@ -154,7 +158,7 @@ def download_clips(clips, videoStruct):
 
 
 
-def combine_clips(clips):
+def combine_clips(clips, transition):
     videoObjects = []
     for clip in clips:
         # Add text below:
@@ -164,9 +168,14 @@ def combine_clips(clips):
         video = CompositeVideoClip([video, txt_clip]).set_duration(video.duration)
         videoObjects.append(video)
 
+    if transition == '':
+        transition = 'assets/tvstatictransition.mp4'
+    else:
+        pass
+    print(f'Using {transition} as the transitioning media')
     print('done creating list of video objects')
     # Make transition clip 1 second long and halve the volume
-    transition = VideoFileClip('assets/tvstatictransition.mp4').fx(afx.volumex, 0.5)
+    transition = VideoFileClip(transition).fx(afx.volumex, 0.5)
     transition = transition.subclip(0, -1)
     # video name based on game
     videoName = Clip.gameName + '.mp4'
@@ -191,6 +200,7 @@ def get_authenticated_service():
     flow = InstalledAppFlow.from_client_secrets_file(
         CLIENT_SECRET_FILE,
         scopes=SCOPES)
+    print('Select the google account where you would like to upload the video')
     credentials = flow.run_local_server()
 
     service = build(API_NAME, API_VERSION, credentials=credentials)
@@ -199,123 +209,49 @@ def get_authenticated_service():
 
 
 
-# def upload_video(service, videoStruct):
-#     vidNumber = get_vid_number(game, language)
-#     videoTitle = ''
-#     email = ''
-#     tags = []
-#     # if thumbnail = None, do auto generation
-#     # Format for autoTN is: gameName.lowercase() + "TN" + vidNumber + ".jpg" IF IT EXISTS
-#     if game == 'Valorant':
-#         if language == 'en':
-#             videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
-#             tags = ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch']
-#             email = 'valorantvikingclips@gmail.com'
-#         elif language == 'es':
-#             videoTitle = f'Valorant Top Moments #{vidNumber} | Best Clips of the Week'
-#             tags = ['valorant viking', 'valorant', 'viking', 'pro valorant', 'valorant clips', 'valorant moments', 'valorant compilation', 'valorant montage', 'valorant twitch', 'twitch']
-#             email = 'valorantvikingclips@gmail.com'
-#     # WHEN EXPANDING TO GTAV COME UP WITH TITLE + VID NUMBER
-#     # CHANGE CONTENT IN SPANISH ELIF
-#     elif game == 'GTAV':
-#         if language == 'en':
-#             videoTitle = f'GTA V Clips of the Week #{vidNumber} | GTA 5 RP Highlights'
-#             tags = ['Twitch', 'gta 5', 'gta rp', 'roleplay', 'gta roleplay', 'twitch gta', 'gta v', 'gta highlights']
-#             email = 'valorantvikingclips@gmail.com'
-#         elif language == 'es':
-#             videoTitle = 'First GTAV Video'
-#             tags = ['first GTAV tags']
-
-#     elif game == 'Just Chatting':
-#         if language == 'en':
-#             videoTitle = f'Most Popular JUST CHATTING Clips of the Week #{vidNumber}'
-#             tags = ['twitch', 'justchatting', 'just chatting', 'twitch 2021', 'twitch july', 'twitch streamers', 'twitch funny', 'best of twitch']
-#             email = 'theholyfishmoley@gmail.com'
-#         elif language == 'es':
-#             videoTitle = f'Los Mejores Clips de Twitch Español Just Chatting #{vidNumber}'
-#             tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'just chatting', 'asmr']
-#             email = 'carnedeoveja737@gmail.com'
-
-#     elif game == 'ASMR':
-#         if language == 'en':
-#             videoTitle = f'🍑💦 Best of Twitch ASMR Week #{vidNumber}'
-#             tags = ['twitch', 'asmr', 'twitch asmr', 'asmr of the week', 'ear licking asmr', 'twitch girl', 'asmr compilation', 'twitch wardrobe malfunction']
-#             email = 'theholyfishmoley@gmail.com'
-#         elif language == 'es':
-#             videoTitle = f'🍑💦 ASMR en Español | Los Mejores Videos de ASMR Twitch #{vidNumber}'
-#             tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'just chatting', 'asmr']
-#             email = 'carnedeoveja737@gmail.com'
-
-#     elif game == 'PHB':
-#         if language == 'en':
-#             videoTitle = f'Twitch Hot Tub Meta | Fails and Wins #{vidNumber} 🍑💦'
-#             tags = ['twitch', 'justchatting', 'hot tub', 'pool', 'swimsuit twitch', 'twitch beach', 'twitch girl', 'twitch thot', 'twitch pool', 'amouranth']
-#             email = 'theholyfishmoley@gmail.com'
-#         elif language == 'es':
-#             videoTitle = f'🍑💦 Mujeres de Twitch Español | Hot Tubs Piscinas y Playas #{vidNumber}'
-#             tags = ['twitch', 'twitch español', 'twitch mexico', 'twitch chicas', 'twitch españa', 'twitch en español', 'playa', 'piscina']
-#             email = 'carnedeoveja737@gmail.com'
-
-#     elif game == 'Dota':
-#             videoTitle = f'Top Dota 2 CLips of the Week {vidNumber} | Twitch Highlights'
-#             tags = ['first GTAV tags']
-#     else:
-#         videoTitle = 'PLACEHOLDER VIDEO TITLE' 
-#         tags = ['placeholder tags']
-#         email = 'the contact information found on our about page'
-
-#     streamers = list(set(streamers))
-#     streamerCredit = ''
-#     for streamer in streamers:
-#         streamer = "https://www.twitch.tv/" + streamer
-#         streamerCredit = streamerCredit + "\n" + streamer
-
-#     # If no thumbnail, use auto-generated thumbnail. Else, use provided thumbnail
-#     if not thumbnail:
-#         filename = f'{game.casefold()}TN{language}{vidNumber}.jpg'
-#         thumbnail = os.path.join(os.getcwd(), 'assets', filename)
-#         print(f'Using {thumbnail} as thumbnail for this video!')
-#     else:
-#         pass
-
-#     if language == 'en':
-#         description = f'{videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send us an email at {email}'
-#     elif language == 'es':
-#         description = f'{videoTitle}\n\nApoya a los streamers en el video!\n{streamerCredit}\n\n» https://creativecommons.org/licenses/by/3.0/\n📧📧Si no quieres aparecer en estos videos, envianos mensaje a {email}'
-
-#     # description = f'{videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}\n\nEverything licensed under Creative Commons: By Attribution 3.0:\n» https://creativecommons.org/licenses/by/3.0/\n\n📧If you would like to stop having your clips featured on this channel just send us an email at {email}'
-#     request_body = {
-#         'snippet': {
-#             'title': videoTitle,
-#             'categoryId': '20',
-#             'description': description,
-#             'tags': tags,
-#             'defaultLanguage': 'en'
-#         },
-#         'status': {
-#             'privacyStatus': 'public',
-#             'selfDeclaredMadeForKids': False
-#         },
-#         'notifySubscribers': False
-#     }
-#     mediaFile = MediaFileUpload(videoName)
-#     print(f'Uploading the following file: {videoName}')
+def upload_video(service, videoStruct):
+    if videoStruct.description != '':
+        pass    # no additional handling needed
+    else:
+        videoStruct.set_default_description()
 
 
-#     print(f'Uploading video with the following information...\n{request_body}')
-#     print(mediaFile)
-#     response_upload = service.videos().insert(
-#         part = 'snippet,status',
-#         body = request_body,
-#         media_body = mediaFile
-#     ).execute()
-#     service.thumbnails().set(
-#         videoId=response_upload.get('id'),
-#         media_body=MediaFileUpload(thumbnail)
-#     ).execute()
+    request_body = {
+        'snippet': {
+            'title': videoStruct.videoTitle,
+            'categoryId': '20',
+            'description': videoStruct.description,
+            'tags': videoStruct.tags,
+            'defaultLanguage': 'en'
+        },
+        'status': {
+            'privacyStatus': videoStruct.privacyStatus,
+            'selfDeclaredMadeForKids': False
+        },
+        'notifySubscribers': False
+    }
+    mediaFile = MediaFileUpload(videoStruct.filename)
+    print(f'Uploading the following file: {videoStruct.filename}')
 
-#     print('Upload complete!')
-#     # END UPLOAD TO YOUTUBE
+
+    print(f'Uploading video with the following information...\n{request_body}')
+    print(mediaFile)
+    response_upload = service.videos().insert(
+        part = 'snippet,status',
+        body = request_body,
+        media_body = mediaFile
+    ).execute()
+    # Set thumbnail if valid file
+    try:
+        service.thumbnails().set(
+            videoId=response_upload.get('id'),
+            media_body=MediaFileUpload(videoStruct.thumbnail)
+        ).execute()
+    except FileNotFoundError:
+        print(f'{videoStruct.thumbnail} could not be found, using auto-generated thumbnail!')
+
+    print('Upload complete!')
+    # END UPLOAD TO YOUTUBE
 
 
 
@@ -330,25 +266,27 @@ def main():
     socket.setdefaulttimeout(100000)
 
     # GET THE BELOW INFORMATION FROM USER ON WEBPAGE
-    gameName = 'VALORANT'
+    gameName = 'Hearthstone'
     Clip.gameName = gameName
     filename = Clip.gameName + '.mp4'
     videoTitle = 'My Video #1'
-    thumbnail = '[link to thumbnail]'
+    thumbnail = '[link to thumbnail]' # optional
     tags = ['valorant', 'top', 'plays']
-    description = 'This is my description'
+    description = '' #optional
+    privacyStatus = 'private'
+    transition = 'assets/tvstatictransition.mp4'
 
     # Creating Video Object
-    videoStruct = VideoObj(gameName, filename, videoTitle, thumbnail, tags, description)
+    videoStruct = VideoObj(gameName, filename, videoTitle, thumbnail, tags, description, privacyStatus)
     credentials = get_credentials()
     # See if possible to create dropdown menu for games
     gameId = get_game_id(gameName, credentials)
-    clips = get_clip_info(credentials, gameId, numClips=20)
+    clips = get_clip_info(credentials, gameId, numClips=2)
     download_clips(clips, videoStruct)
-    vidPath = combine_clips(clips)
+    vidPath = combine_clips(clips, transition)
     videoStruct.filename = vidPath
     ytService = get_authenticated_service()
-    # upload_video(ytService, videoStruct)
+    upload_video(ytService, videoStruct)
     
 
     endTime = datetime.now()
