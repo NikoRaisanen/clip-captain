@@ -135,9 +135,6 @@ def download_clips(clips, videoStruct):
     if not os.path.exists(downloadPath):
         os.mkdir(downloadPath)
 
-    # Create Video Object and define required attributes
-    # vidFileName = Clip.gameName + '.mp4'
-
     for clip in clips:
         r = requests.get(clip.downloadLink, allow_redirects=True)
         videoStruct.streamers.append(clip.streamerName)
@@ -252,12 +249,6 @@ def upload_video(service, videoStruct):
 
     print('Upload complete!')
     # END UPLOAD TO YOUTUBE
-
-
-
-
-
-
 
 
 def main():
