@@ -250,6 +250,38 @@ def upload_video(service, videoStruct):
     print('Upload complete!')
     # END UPLOAD TO YOUTUBE
 
+def all_in_one():
+    beginTime = datetime.now()
+    # Increase socket default timemout due to connection dropping during large file uploads
+    socket.setdefaulttimeout(100000)
+
+    # GET THE BELOW INFORMATION FROM USER ON WEBPAGE
+    gameName = 'Hearthstone'
+    Clip.gameName = gameName
+    filename = Clip.gameName + '.mp4'
+    videoTitle = 'My Video #1'
+    thumbnail = '[link to thumbnail]' # optional
+    tags = ['valorant', 'top', 'plays']
+    description = '' #optional
+    privacyStatus = 'private'
+    transition = 'assets/tvstatictransition.mp4'
+
+    # Creating Video Object
+    videoStruct = VideoObj(gameName, filename, videoTitle, thumbnail, tags, description, privacyStatus)
+    credentials = get_credentials()
+    ytService = get_authenticated_service()
+    # See if possible to create dropdown menu for games
+    gameId = get_game_id(gameName, credentials)
+    clips = get_clip_info(credentials, gameId, numClips=2)
+    download_clips(clips, videoStruct)
+    vidPath = combine_clips(clips, transition)
+    videoStruct.filename = vidPath
+    # ytService = get_authenticated_service()
+    upload_video(ytService, videoStruct)
+    
+
+    endTime = datetime.now()
+    print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
 def main():
     beginTime = datetime.now()

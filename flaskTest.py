@@ -28,7 +28,7 @@ def handle_data():
     session['privacyStatus'] = request.form['privacyStatus']
     session['tags'] = request.form['tags']
     session['description'] = request.form['description']
-    return "handle_data() completed"
+    return redirect(url_for('home'))
 
 @app.route('/test')
 def script1():
@@ -38,8 +38,8 @@ def script1():
 
 @app.route('/var')
 def var_test():
-    varOutput = f"{session['gameName']}\n{session['videoTitle']}\n{session['thumbnail']}\n{session['privacyStatus']}\n{session['tags']}\n{session['description']}"
-    return varOutput
+    backendService.all_in_one()
+    return 'executing all_in_one()'
 if __name__ == '__main__':
     app.run(debug=True)
     
