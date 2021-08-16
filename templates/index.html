@@ -8,44 +8,44 @@
   </head>
   <body>
     <div class="testbox">
-      <form action="/">
+      <form action="{{ url_for('handle_data') }}" method="post">
         <div class="banner">
           <h1>Create a Video</h1>
         </div>
         <div class="item">
-          <p>Name</p>
+          <p>Game Name</p>
           <div class="name-item">
-            <input type="text" name="name" placeholder="First" />
+            <input type="text" name="gameName" placeholder="Dota 2, Valorant, Path of Exile, etc." />
           </div>
         </div>
         <div class="contact-item">
           <div class="item">
-            <p>Email</p>
-            <input type="text" name="name"/>
+            <p>Video Title</p>
+            <input type="text" name="videoTitle"/>
           </div>
           <div class="item">
-            <p>Phone</p>
-            <input type="text" name="name"/>
+            <p>Thumbnail</p>
+            <input type="text" name="thumbnail"/>
           </div>
         </div>
         <div class="item">
-          <p>Name</p>
+          <p>Privacy Status</p>
           <div class="name-item">
-            <input type="text" name="name" placeholder="First" />
+            <input type="text" name="privacyStatus" placeholder="Private" />
           </div>
         </div>
-        <div class="contact-item">
+        <!-- <div class="contact-item">
           <div class="item">
             <p>Email</p>
             <input type="text" name="name"/>
-          </div>
+          </div> -->
         <div class="item">
-          <p>Roommate Preferences</p>
-          <textarea rows="3" required></textarea>
+          <p>Tags</p>
+          <textarea rows="3" name="tags"></textarea>
         </div>
         <div class="item">
-          <p>Pet Restrictions</p>
-          <textarea rows="3" required></textarea>
+          <p>Description</p>
+          <textarea rows="3" name="description"></textarea>
         </div>
         <div class="btn-block">
           <button type="submit" href="/">APPLY</button>
