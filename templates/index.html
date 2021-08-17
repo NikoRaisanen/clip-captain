@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
     <link rel="stylesheet" href="static/main.css">
   </head>
-  <body>
+  <body onload="">
     <div class="testbox">
       <form action="{{ url_for('handle_data') }}" method="post">
         <div class="banner">
@@ -48,11 +48,15 @@
           <textarea rows="3" name="description"></textarea>
         </div>
         <div class="btn-block">
-          <button type="submit" onclick="test()">Create Video</button>
+          <button id="submitBtn" type="submit" onclick="test2()">Create Video</button>
         </div>
       </form>
     </div>
-    <script src="scripts.js"></script>
+    <script src="static/scripts.js"></script>
 
+    <div class="output">
+      <p>Output</p>
+      <textarea rows="3" name="output">{{ x }}</textarea>
+    </div>
   </body>
 </html>

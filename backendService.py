@@ -283,6 +283,9 @@ def all_in_one():
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
+def status_update(message):
+    return message
+
 def main():
     beginTime = datetime.now()
     # Increase socket default timemout due to connection dropping during large file uploads
