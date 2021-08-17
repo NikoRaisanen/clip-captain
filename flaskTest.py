@@ -23,8 +23,8 @@ def home():
     session['status'] = 'status set in home()'
     return render_template('index.html')
 
-@app.route('/handle_data', methods=['POST'])
-def handle_data():
+@app.route('/get_data', methods=['POST'])
+def get_data():
     # ytService = backendService.get_authenticated_service()
 
     session['gameName'] = request.form['gameName']
@@ -33,7 +33,14 @@ def handle_data():
     session['privacyStatus'] = request.form['privacyStatus']
     session['tags'] = request.form['tags']
     session['description'] = request.form['description']
-    return redirect(url_for('home'))
+    session['status'] = 'status set in get_data()'
+    # return redirect(url_for('home'))
+    return render_template('index.html')
+
+# Delete this route and put processing.html into the render_template above
+@app.route('/process')
+def process_video():
+    return render_template('process.html')
 
 @app.route('/test')
 def script1():

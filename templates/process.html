@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Effortless Youtube Videos</title>
+    <!-- <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet"> -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+    <link rel="stylesheet" href="static/main.css">
+  </head>
+  <body onload="">
+    <div class="testbox">
+      <form action="{{ url_for('get_data') }}" method="post">
+        <div class="banner">
+          <h1>Create a Video</h1>
+        </div>
+        <br>
+        <div class="extrapad">
+        <p class="vidInfo"><strong>Game:&nbsp;&nbsp;</strong>Dota 2</p>
+        </div>
+        <div class="extrapad">
+          <p class="vidInfo"><strong>Title:&nbsp;&nbsp;</strong>Best Dota Plays 2021</p>
+          </div>
+          <div class="extrapad">
+            <p class="vidInfo"><strong>Thumbnail:&nbsp;&nbsp;</strong>myTN.jpeg</p>
+            </div>
+            <div class="extrapad">
+              <p class="vidInfo"><strong>Privacy Status:&nbsp;&nbsp;</strong>Private</p>
+              </div>
+        <!-- <div class="contact-item">
+          <div class="item">
+            <p>Email</p>
+            <input type="text" name="name"/>
+          </div> -->
+          <div class="extrapad">
+            <p class="vidInfo"><strong>Tags:&nbsp;&nbsp;</strong>Twitch dota, Dota 2, best plays 2021</p>
+            </div>
+        <div class="extrapad">
+          <p class="vidInfo"><strong>Description:&nbsp;&nbsp;</strong>This is my description, make sure to subscribe OR ELSE</p>
+          </div>
+          <br>
+        <div class="outputbox">
+          <p>Program Status</p>
+          <textarea rows="3" name="description"></textarea>
+        </div>
+      </form>
+    </div>
+    <script src="static/scripts.js"></script>
+  </body>
+</html>
