@@ -6,9 +6,9 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
     <link rel="stylesheet" href="static/main.css">
   </head>
-  <body onload="">
+  <body onload="get_status()">
     <div class="testbox">
-      <form>
+      <form action="{{ url_for('execute_program') }}" method="get">
         <div class="banner">
           <h1>Create a Video</h1>
         </div>
@@ -39,8 +39,13 @@
           <br>
         <div class="outputbox">
           <p>Program Status</p>
-          <textarea rows="3" name="description">{{ status }}</textarea>
+          <textarea id="status" rows="3" name="status">{{ status }}</textarea>
         </div>
+        <div class="outputbox">
+          <p>Testbox</p>
+          <textarea id="test1" rows="3" name="status"></textarea>
+        </div>
+        <button id="submitBtn" type="submit">Upload Video</button>
       </form>
     </div>
     <script src="static/scripts.js"></script>

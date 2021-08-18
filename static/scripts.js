@@ -2,6 +2,7 @@ function test2() {
     alert("Test2 executed!")
 }
 
+
 function get_status() {
     fetch('/status')
         .then(function (response) {
@@ -9,7 +10,25 @@ function get_status() {
         })
         .then(function (json) {
             // console.log('GET response as JSON:');
-            console.log(json); // Here’s our JSON object
+            // console.log(json); // Here’s our JSON object
+            // alert(JSON.stringify(json.status))
+            // console.log(JSON.stringify(json.status))
+            console.log(JSON.stringify(json.status))
+            document.getElementById('test1').innerText = JSON.stringify(json.status)
         })
-        // setTimeout(get_status, 1000);
+        setTimeout(get_status, 5000);
     }
+
+// function get_status() {
+//     fetch('/status')
+//         .then(function (response) {
+//             return response.json()
+//         })
+//         .then(function (json) {
+//             return json.status
+//         })
+//         .then(function (status) {
+//             document.getElementById("status").innerHTML = status
+//         })
+//         // setTimeout(get_status, 1000);
+//     }
