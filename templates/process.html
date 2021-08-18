@@ -8,22 +8,22 @@
   </head>
   <body onload="">
     <div class="testbox">
-      <form action="{{ url_for('get_data') }}" method="post">
+      <form>
         <div class="banner">
           <h1>Create a Video</h1>
         </div>
         <br>
         <div class="extrapad">
-        <p class="vidInfo"><strong>Game:&nbsp;&nbsp;</strong>Dota 2</p>
+        <p class="vidInfo"><strong>Game:&nbsp;&nbsp;</strong>{{ gameName }}</p>
         </div>
         <div class="extrapad">
-          <p class="vidInfo"><strong>Title:&nbsp;&nbsp;</strong>Best Dota Plays 2021</p>
+          <p class="vidInfo"><strong>Title:&nbsp;&nbsp;</strong>{{ videoTitle }}</p>
           </div>
           <div class="extrapad">
-            <p class="vidInfo"><strong>Thumbnail:&nbsp;&nbsp;</strong>myTN.jpeg</p>
+            <p class="vidInfo"><strong>Thumbnail filename:&nbsp;&nbsp;</strong>{{ thumbnail }}</p>
             </div>
             <div class="extrapad">
-              <p class="vidInfo"><strong>Privacy Status:&nbsp;&nbsp;</strong>Private</p>
+              <p class="vidInfo"><strong>Privacy Status:&nbsp;&nbsp;</strong>{{ privacyStatus }}</p>
               </div>
         <!-- <div class="contact-item">
           <div class="item">
@@ -31,15 +31,15 @@
             <input type="text" name="name"/>
           </div> -->
           <div class="extrapad">
-            <p class="vidInfo"><strong>Tags:&nbsp;&nbsp;</strong>Twitch dota, Dota 2, best plays 2021</p>
+            <p class="vidInfo"><strong>Tags:&nbsp;&nbsp;</strong>{{ tags }}</p>
             </div>
         <div class="extrapad">
-          <p class="vidInfo"><strong>Description:&nbsp;&nbsp;</strong>This is my description, make sure to subscribe OR ELSE</p>
+          <p class="vidInfo"><strong>Description:&nbsp;&nbsp;</strong>{{ description }}</p>
           </div>
           <br>
         <div class="outputbox">
           <p>Program Status</p>
-          <textarea rows="3" name="description"></textarea>
+          <textarea rows="3" name="description">{{ status }}</textarea>
         </div>
       </form>
     </div>

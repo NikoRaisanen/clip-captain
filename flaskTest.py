@@ -9,13 +9,10 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Max thumbnail upload size of 2MB
+app.config['MAX_CONTENT-PATH'] = 2 * 1024 * 1024
 app.secret_key = 'any random string'
 
-# Declaring required global variables
-
-# def script_output():
-#     output = execute('./script')
-#     return render_template('template_name.html',output=output)
 
 # If GET request, serve index.html
 @app.route('/')
@@ -29,13 +26,18 @@ def get_data():
 
     session['gameName'] = request.form['gameName']
     session['videoTitle'] = request.form['videoTitle']
-    session['thumbnail'] = request.form['thumbnail']
     session['privacyStatus'] = request.form['privacyStatus']
     session['tags'] = request.form['tags']
     session['description'] = request.form['description']
     session['status'] = 'status set in get_data()'
+    print(session['thumbnail'])
     # return redirect(url_for('home'))
-    return render_template('index.html')
+    file = request.files['thumbnail']
+
+    filename = secure_filename(file.filename)
+    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    print(f"Here is the {filename}")
+    return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=filename, privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'], status=session['status'])
 
 # Delete this route and put processing.html into the render_template above
 @app.route('/process')

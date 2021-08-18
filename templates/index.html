@@ -8,7 +8,7 @@
   </head>
   <body onload="">
     <div class="testbox">
-      <form action="{{ url_for('get_data') }}" method="post">
+      <form action="{{ url_for('get_data') }}" method="post" enctype="multipart/form-data">
         <div class="banner">
           <h1>Create a Video</h1>
         </div>
@@ -24,9 +24,9 @@
             <input type="text" name="videoTitle"/>
           </div>
           <div class="item">
-            <p>Thumbnail</p>
-            <input type="text" name="thumbnail"/>
-          </div>
+            <p>Upload Thumbnail</p>
+              <input type=file name="thumbnail">
+            
         </div>
         <div class="item">
           <p>Privacy Status</p>
