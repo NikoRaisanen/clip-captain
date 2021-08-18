@@ -36,16 +36,19 @@
         <div class="extrapad">
           <p class="vidInfo"><strong>Description:&nbsp;&nbsp;</strong>{{ description }}</p>
           </div>
+          <hr>
           <br>
-        <div class="outputbox">
+        <!-- <div class="outputbox">
           <p>Program Status</p>
           <textarea id="status" rows="3" name="status">{{ status }}</textarea>
+        </div> -->
+        <div>
+          <h2>Current Progress</h2>
+          <p id="userUpdate"></p>
         </div>
-        <div class="outputbox">
-          <p>Testbox</p>
-          <textarea id="test1" rows="3" name="status"></textarea>
-        </div>
+        <div class="btn-block">
         <button id="submitBtn" type="submit">Upload Video</button>
+        </div>
       </form>
     </div>
     <script src="static/scripts.js"></script>

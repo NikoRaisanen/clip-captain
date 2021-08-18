@@ -111,3 +111,6 @@ html, body {
         padding-bottom: 10px;
         padding-top: 10px;
     }
+    #userUpdate {
+        font-size: 2rem;
+    }

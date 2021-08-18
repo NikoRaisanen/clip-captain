@@ -5,6 +5,7 @@ from backendService import Clip, VideoObj
 from flask import Flask, flash, request, redirect, url_for, render_template, session, json
 from werkzeug.utils import secure_filename
 
+global globalStatus
 UPLOAD_FOLDER = 'thumbnails'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
@@ -24,13 +25,14 @@ def home():
 @app.route('/get_data', methods=['POST'])
 def get_data():
     # ytService = backendService.get_authenticated_service()
+    global globalStatus
+    globalStatus = "Starting get_data()"
     session['gameName'] = request.form['gameName']
     session['videoTitle'] = request.form['videoTitle']
     session['privacyStatus'] = request.form['privacyStatus']
     session['tags'] = request.form['tags']
     session['description'] = request.form['description']
     session['status'] = 'status set in get_data()'
-    print(session['thumbnail'])
     # return redirect(url_for('home'))
     file = request.files['thumbnail']
 
@@ -38,33 +40,35 @@ def get_data():
     session['thumbnailName'] = filename
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     print(f"Here is the {filename}")
-    return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=filename, privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'], status=session['status'])
+    return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=filename, privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'])
 
 # Delete this route and put processing.html into the render_template above
 @app.route('/execute_program')
 def execute_program():
 
-    session['status'] = 'Very top of /execute_program'
+    global globalStatus
+    globalStatus = "Starting Execute_program"
     Clip.gameName = session['gameName']
     filename = Clip.gameName + '.mp4'
     videoStruct = VideoObj(session['gameName'], filename, session['videoTitle'], session['thumbnailName'], session['tags'], session['description'], session['privacyStatus'])
     transition = 'assets/tvstatictransition.mp4'
-    session['status'] = 'Authenticating....'
+    globalStatus = "Authenticating..."
 
     ytService = backendService.get_authenticated_service()
     credentials = backendService.get_credentials()
-    session['status'] = 'Getting clip info (finding and downloading)'
+    globalStatus = 'Getting clip information...'
     gameId = backendService.get_game_id(session['gameName'], credentials)
     clips = backendService.get_clip_info(credentials, gameId, numClips=2)
+    globalStatus = 'Downloading clips...'
     backendService.download_clips(clips, videoStruct)
-    session['status'] = 'Combining clips...'
+    globalStatus = 'Combining clips...'
     vidPath = backendService.combine_clips(clips, transition)
     videoStruct.filename = vidPath
     # ytService = get_authenticated_service()
-    session['status'] = 'UPLOADING VIDEO!'
+    globalStatus = 'Beginning video upload!'
     backendService.upload_video(ytService, videoStruct)
-    session['status'] = 'WOOHOO WE ARE DONE!'
-    return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=session['thumbnailName'], privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'], status='ALL DONE...')
+    globalStatus = 'Woo hoo! The video is uploaded, check your channel to see the video!'
+    return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=session['thumbnailName'], privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'])
 
 @app.route('/test')
 def script1():
@@ -84,7 +88,7 @@ def var_test():
 
 @app.route('/status')
 def status():
-    message = {'status': session['status']}
+    message = {'status': globalStatus}
     return json.jsonify(message)
 
 if __name__ == '__main__':
