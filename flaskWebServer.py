@@ -51,7 +51,6 @@ def get_data():
 def execute_program():
 
     global globalStatus
-    globalStatus = "Starting Execute_program"
     Clip.gameName = session['gameName']
     thumbnail = os.path.join(os.getcwd(), 'thumbnails', session['thumbnailName'])
     filename = Clip.gameName + '.mp4'
@@ -69,6 +68,7 @@ def execute_program():
     globalStatus = 'Combining clips...'
     vidPath = backendService.combine_clips(clips, transition)
     videoStruct.filename = vidPath
+
     # ytService = get_authenticated_service()
     globalStatus = 'Beginning video upload!'
     backendService.upload_video(ytService, videoStruct)
