@@ -35,7 +35,7 @@ html, body {
     .banner {
     position: relative;
     height: 210px;
-    background-image: url("/uploads/media/default/0001/01/f1cf9a9068f4bfbdbd9758c45db79203579a3561.jpeg");      background-size: cover;
+    background-image: url("/static/beach.jpeg");      background-size: cover;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -106,6 +106,8 @@ html, body {
     }
     .vidInfo {
         font-size: 1.2rem;
+        border-color: black;
+        border: 3px;
     }
     .extrapad {
         padding-bottom: 10px;
@@ -113,4 +115,16 @@ html, body {
     }
     #userUpdate {
         font-size: 2rem;
+        line-height: 125%;
+    }
+    #bannertext {
+        font-size: 3rem;
+        -webkit-text-stroke: 1px black;
+        color: white;
+        text-shadow:
+            3px 3px 0 #000,
+            -1px -1px 0 #000,  
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
     }

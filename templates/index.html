@@ -10,7 +10,7 @@
     <div class="testbox">
       <form action="{{ url_for('get_data') }}" method="post" enctype="multipart/form-data">
         <div class="banner">
-          <h1>Create a Video</h1>
+          <h1 id="bannertext">Create a Video</h1>
         </div>
         <div class="item">
           <p>Game Name</p>
@@ -48,7 +48,8 @@
           <textarea rows="3" name="description"></textarea>
         </div>
         <div class="btn-block">
-          <button id="submitBtn" type="submit" onclick="test2()">Create Video</button>
+          <br>
+          <button id="submitBtn" type="submit" onclick="">Create Video</button>
         </div>
       </form>
     </div>

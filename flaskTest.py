@@ -26,7 +26,7 @@ def home():
 def get_data():
     # ytService = backendService.get_authenticated_service()
     global globalStatus
-    globalStatus = "Starting get_data()"
+    globalStatus = "Press the upload button to get started!"
     session['gameName'] = request.form['gameName']
     session['videoTitle'] = request.form['videoTitle']
     session['privacyStatus'] = request.form['privacyStatus']
@@ -35,11 +35,14 @@ def get_data():
     session['status'] = 'status set in get_data()'
     # return redirect(url_for('home'))
     file = request.files['thumbnail']
-
     filename = secure_filename(file.filename)
     session['thumbnailName'] = filename
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     print(f"Here is the {filename}")
+
+    
+
+    
     return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=filename, privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'])
 
 # Delete this route and put processing.html into the render_template above
@@ -49,8 +52,9 @@ def execute_program():
     global globalStatus
     globalStatus = "Starting Execute_program"
     Clip.gameName = session['gameName']
+    thumbnail = os.path.join(os.getcwd(), 'thumbnails', session['thumbnailName'])
     filename = Clip.gameName + '.mp4'
-    videoStruct = VideoObj(session['gameName'], filename, session['videoTitle'], session['thumbnailName'], session['tags'], session['description'], session['privacyStatus'])
+    videoStruct = VideoObj(session['gameName'], filename, session['videoTitle'], thumbnail, session['tags'], session['description'], session['privacyStatus'])
     transition = 'assets/tvstatictransition.mp4'
     globalStatus = "Authenticating..."
 
@@ -67,7 +71,7 @@ def execute_program():
     # ytService = get_authenticated_service()
     globalStatus = 'Beginning video upload!'
     backendService.upload_video(ytService, videoStruct)
-    globalStatus = 'Woo hoo! The video is uploaded, check your channel to see the video!'
+    globalStatus = "Woo hoo! The video is uploaded, check your channel to see the video!"
     return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=session['thumbnailName'], privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'])
 
 @app.route('/test')

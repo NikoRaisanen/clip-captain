@@ -10,7 +10,7 @@
     <div class="testbox">
       <form action="{{ url_for('execute_program') }}" method="get">
         <div class="banner">
-          <h1>Create a Video</h1>
+          <h1 id="bannertext">Confirmation</h1>
         </div>
         <br>
         <div class="extrapad">
@@ -34,7 +34,36 @@
             <p class="vidInfo"><strong>Tags:&nbsp;&nbsp;</strong>{{ tags }}</p>
             </div>
         <div class="extrapad">
-          <p class="vidInfo"><strong>Description:&nbsp;&nbsp;</strong>{{ description }}</p>
+          <!-- Jinja2 syntax to display default description if necessary-->
+          <p class="vidInfo"><strong>Description:<br></strong>
+            {% if session['description'] %}
+            
+              {{ description }}
+            {% else %}
+
+              {{session['videoTitle']}}
+              <br>
+              <br>
+
+              Make sure to support the streamers in the video!
+              <br>
+              <br>
+              [**Crediting the owner of each clip (example below)**]
+              <br>
+              https://www.twitch.tv/shroud
+              <br>
+              https://www.twitch.tv/vanity
+              <br>
+              https://www.twitch.tv/ShahZaM
+              <br>
+              https://www.twitch.tv/BOOMBURAPA
+              <br>
+              https://www.twitch.tv/LeviathanAG_
+              <br>
+              https://www.twitch.tv/LotharHS
+              <br>
+              https://www.twitch.tv/Nikolarn
+            {% endif %}</p>
           </div>
           <hr>
           <br>
@@ -46,6 +75,7 @@
           <h2>Current Progress</h2>
           <p id="userUpdate"></p>
         </div>
+        <br>
         <div class="btn-block">
         <button id="submitBtn" type="submit">Upload Video</button>
         </div>
