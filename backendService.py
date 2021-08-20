@@ -207,6 +207,7 @@ def get_authenticated_service():
 
 
 def upload_video(service, videoStruct):
+    socket.setdefaulttimeout(100000)
     if videoStruct.description != '':
         pass    # no additional handling needed
     else:

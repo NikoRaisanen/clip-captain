@@ -33,6 +33,7 @@ def get_data():
     session['tags'] = request.form['tags']
     session['description'] = request.form['description']
     session['status'] = 'status set in get_data()'
+    session['numClips'] = request.form['numClips']
     # return redirect(url_for('home'))
     file = request.files['thumbnail']
     filename = secure_filename(file.filename)
@@ -40,10 +41,10 @@ def get_data():
     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     print(f"Here is the {filename}")
 
-    
+
 
     
-    return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=filename, privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'])
+    return render_template('process.html', gameName=session['gameName'], videoTitle=session['videoTitle'], thumbnail=filename, numClips=session['numClips'], privacyStatus=session['privacyStatus'], tags=session['tags'], description=session['description'])
 
 # Delete this route and put processing.html into the render_template above
 @app.route('/execute_program')
@@ -62,7 +63,7 @@ def execute_program():
     credentials = backendService.get_credentials()
     globalStatus = 'Getting clip information...'
     gameId = backendService.get_game_id(session['gameName'], credentials)
-    clips = backendService.get_clip_info(credentials, gameId, numClips=2)
+    clips = backendService.get_clip_info(credentials, gameId, numClips=int(session['numClips']))
     globalStatus = 'Downloading clips...'
     backendService.download_clips(clips, videoStruct)
     globalStatus = 'Combining clips...'

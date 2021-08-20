@@ -12,26 +12,54 @@
         <div class="banner">
           <h1 id="bannertext">Create a Video</h1>
         </div>
-        <div class="item">
-          <p>Game Name</p>
+        <div class="about">
+          <h2 id="aboutHeader">About The Project<h2>
+          <p id="about1">This program allows you to make AND upload a highlight video with the push of a button. No need to spend time finding footage, editing it together, or even going to your Youtube studio.
+          <br>
+          <br>
+          In regards to attribution, all clips contain a text overlay which shows the name of the content creator. A link to the channel of each content creator that appears in the video is also provided with the default description.
+          <br>
+          <br>
+          With this software you could hypothetically mass-manufacture highlight videos across many verticals and monetize through Google ad revenue and sponsor activations
+          </p>
+          <br>
+          <br>
+          Simply put, here is how it works:
+          <ol id="how">
+            <li>The X most popular clips for the selected game are downloaded</li>
+            <li>Clips are "watermarked" with their respective content creator</li>
+            <li>Clips are then merged together with a quality transition and consolidated into a single .mp4 file</li>
+            <li>This .mp4 file is uploaded to your youtube channel with the selected options</li>
+          </ol>
+        </div>
+        <div class="item extrapad">
+          <p class="required" id="game1">Game Name</p>
           <div class="name-item">
-            <input type="text" name="gameName" placeholder="Dota 2, Valorant, Path of Exile, etc." />
+            <input type="text" name="gameName" required placeholder="Dota 2, Valorant, Path of Exile, etc." />
+            <p id="nameHelp">Choose from any game <a href="https://www.twitch.tv/directory">HERE</a>-- Spell game as shown in directory (case <strong>insensitive</strong>)</p>
           </div>
         </div>
         <div class="contact-item">
           <div class="item">
-            <p>Video Title</p>
-            <input type="text" name="videoTitle"/>
+            <p class="required">Video Title</p>
+            <input type="text" name="videoTitle" required placeholder="Title for your video"/>
           </div>
           <div class="item">
-            <p>Upload Thumbnail</p>
-              <input type=file name="thumbnail">
-            
+            <p class="required">Upload Thumbnail</p>
+              <input type=file name="thumbnail" required>
+        </div>
+        <p id="numClips"></p>
+        <div class="slidecontainer">
+          <input type="range" min="2" max="20" value="10" class="slider" id="myRange" name="numClips">
         </div>
         <div class="item">
-          <p>Privacy Status</p>
+          <p class="required">Privacy Status</p>
           <div class="name-item">
-            <input type="text" name="privacyStatus" placeholder="Private" />
+            <select name="privacyStatus">
+              <option value="Private">Private</option>
+              <option value="Unlisted">Unlisted</option>
+              <option value="Public">Public</option>
+            </select>
           </div>
         </div>
         <!-- <div class="contact-item">
@@ -41,11 +69,11 @@
           </div> -->
         <div class="item">
           <p>Tags</p>
-          <textarea rows="3" name="tags"></textarea>
+          <textarea rows="3" name="tags" placeholder="Comma-separated"></textarea>
         </div>
         <div class="item">
           <p>Description</p>
-          <textarea rows="3" name="description"></textarea>
+          <textarea rows="3" name="description" placeholder="Description for your video. If blank, we will use a default auto-generated description based on your video title and clips used!"></textarea>
         </div>
         <div class="btn-block">
           <br>

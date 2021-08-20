@@ -40,6 +40,9 @@ html, body {
     justify-content: center;
     align-items: center;
     text-align: center;
+    /* -moz-box-shadow: 0 0 10px black;
+    -webkit-box-shadow: 0 0 10px black; */
+    box-shadow: 0 0 20px black;
     }
     .banner::after {
     content: "";
@@ -100,6 +103,9 @@ html, body {
     .name-item input {
     width: 50%;
     }
+    .name-item select {
+        width: 50%;
+    }
     .contact-item input {
     width: 50%;
     }
@@ -128,3 +134,35 @@ html, body {
             -1px 1px 0 #000,
             1px 1px 0 #000;
     }
+    .required:after { 
+        content:" *";
+        color: red; 
+    }
+    /* #nameHelp, #game1 {
+        display: inline;
+    }
+    #nameHelp {
+        margin-left: 10%;
+    } */
+.contact-item {
+    display: inline;
+}
+.about {
+    display: inline;
+    width: 40%;
+    margin-right: 5%;
+    float: right;
+}
+
+.about #aboutHeader {
+    text-align: center;
+}
+#how {
+    font-size: 1rem;
+    line-height: 150%;
+}
+
+/* BELOW IS FOR SLIDER ON MAIN PAGE */
+.slidecontainer {
+    width: 50%; /* Width of the outside container */
+}
