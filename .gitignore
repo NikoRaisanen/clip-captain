@@ -139,7 +139,7 @@ cython_debug/
 
 # Private stuff, credentials, etc.
 confidential.json
-/clips
+/clips/
 /clips/Valorant/*.mp4
 /clips/GTAV/*.mp4
 /clips/Dota/*.mp4
@@ -149,3 +149,5 @@ confidential.json
 client_secret.json
 client_secret2.json
 *PICKLE*
+twitchCreds.json
+/thumbnails

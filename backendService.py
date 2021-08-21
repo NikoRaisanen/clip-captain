@@ -6,9 +6,6 @@ from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from datetime import datetime
-
-from google.auth.transport.requests import Request
-import pickle
 import os
 import socket
 
@@ -131,6 +128,8 @@ def download_clips(clips, videoStruct):
     counter = 0
     global downloadPath
     basePath = os.path.join(os.getcwd(), 'clips')
+    if not os.path.exists(basePath):
+        os.mkdir(basePath)
     downloadPath = os.path.join(basePath, Clip.gameName)
     if not os.path.exists(downloadPath):
         os.mkdir(downloadPath)
@@ -149,10 +148,6 @@ def download_clips(clips, videoStruct):
     videoStruct.unique_streamers()
     print(f'Here are the unique streamers:\n{videoStruct.streamers}')
     print(f'Finished downloading {counter} clips for {Clip.gameName}!')
-
-
-
-
 
 
 def combine_clips(clips, transition):
@@ -178,14 +173,11 @@ def combine_clips(clips, transition):
     videoName = Clip.gameName + '.mp4'
     print('Beginning to concatenate video clips...')
     final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
-    # final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
-    final.write_videofile(os.path.join(os.getcwd(), 'finalVideos', videoName), fps=60, bitrate="6000k")
+    # Create finalVideos folder if it doesn't exist
+    if not os.path.exists(os.path.join(os.getcwd(), 'finalVideos')):
+        os.mkdir('finalVideos')
+    final.write_videofile(os.path.join(os.getcwd(), 'finalVideos', videoName), fps=60, bitrate="6000k", threads=2)
     return os.path.join(os.getcwd(), 'finalVideos', videoName)
-
-    # END CLIP PROCUREMENT, DOWNLOAD, AND COMBINING
-
-
-
 
 
 def get_authenticated_service():    
@@ -202,8 +194,6 @@ def get_authenticated_service():
 
     service = build(API_NAME, API_VERSION, credentials=credentials)
     return service
-
-
 
 
 def upload_video(service, videoStruct):
@@ -280,44 +270,13 @@ def all_in_one():
     # ytService = get_authenticated_service()
     upload_video(ytService, videoStruct)
     
-
     endTime = datetime.now()
     print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
 
-def status_update(message):
-    return message
 
 def main():
-    beginTime = datetime.now()
-    # Increase socket default timemout due to connection dropping during large file uploads
-    socket.setdefaulttimeout(100000)
-
-    # GET THE BELOW INFORMATION FROM USER ON WEBPAGE
-    gameName = 'Hearthstone'
-    Clip.gameName = gameName
-    filename = Clip.gameName + '.mp4'
-    videoTitle = 'My Video #1'
-    thumbnail = '[link to thumbnail]' # optional
-    tags = ['valorant', 'top', 'plays']
-    description = '' #optional
-    privacyStatus = 'private'
-    transition = 'assets/tvstatictransition.mp4'
-
-    # Creating Video Object
-    videoStruct = VideoObj(gameName, filename, videoTitle, thumbnail, tags, description, privacyStatus)
-    credentials = get_credentials()
-    # See if possible to create dropdown menu for games
-    gameId = get_game_id(gameName, credentials)
-    clips = get_clip_info(credentials, gameId, numClips=2)
-    download_clips(clips, videoStruct)
-    vidPath = combine_clips(clips, transition)
-    videoStruct.filename = vidPath
-    ytService = get_authenticated_service()
-    upload_video(ytService, videoStruct)
-    
-
-    endTime = datetime.now()
-    print(f'The execution of this script took {(endTime - beginTime).seconds} seconds')
+    # Not intended to run as main, possibly use this for simple CLI tool
+    pass
 
 if __name__ == "__main__":
     main()
