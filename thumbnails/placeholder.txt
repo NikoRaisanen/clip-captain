@@ -1,0 +1,1 @@
+allows tracking of thumbnails folder

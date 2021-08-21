@@ -138,16 +138,6 @@ dmypy.json
 cython_debug/
 
 # Private stuff, credentials, etc.
-confidential.json
-/clips/
-/clips/Valorant/*.mp4
-/clips/GTAV/*.mp4
-/clips/Dota/*.mp4
-/clips/Just Chatting/*.mp4
-/clips/ASMR/*.mp4
-/finalVideos/*.mp4
+/clips/*
 client_secret.json
-client_secret2.json
-*PICKLE*
 twitchCreds.json
-/thumbnails
