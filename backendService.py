@@ -49,7 +49,7 @@ class Clip:
 
 # General functions go below here
 def get_credentials():
-    with open('confidential.json', 'r') as fp:
+    with open('twitchCreds.json', 'r') as fp:
         credentials = json.load(fp)
         return credentials
 
