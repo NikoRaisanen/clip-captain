@@ -21,3 +21,10 @@ With such a simple formula to create this type of video, there must be a way to 
 4. These updated clips are edited together with a common "tv static" transition
 5. The resulting video is written into a directory called finalVideos
 6. The final video is uploaded to YOUR Youtube channel according to the settings specified in the front-end application
+
+Sample of what the resulting videos look like:
+
+
+## How it works
+The project wasn't as straight-forward as it may seem, in the below video I take you through a deeper dive on how the program works under the hood
+**[add link to YT video that I will make]**
