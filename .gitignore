@@ -139,5 +139,4 @@ cython_debug/
 
 # Private stuff, credentials, etc.
 /clips/*
-client_secret.json
-twitchCreds.json
+/secrets/twitch_creds.json
