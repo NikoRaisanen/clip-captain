@@ -8,6 +8,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from datetime import datetime
 import os
 import socket
+import helpers.auth as auth
 
 # Data structure for the final video, used to populate information in Youtube Upload API
 class VideoObj:
@@ -44,32 +45,32 @@ class Clip:
         self.streamerName = streamerName
         self.filename = filename
 
-# General functions go below here
-def get_credentials():
-    with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'r') as fp:
-        return json.load(fp)
+# # General functions go below here
+# def get_credentials():
+#     with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'r') as fp:
+#         return json.load(fp)
 
-def update_bearer(bearer):
-    """update bearer token in credentials file"""
-    curr = None
-    with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'r') as fp:
-        curr = json.load(fp)
-    # update dict with new bearer
-    curr['bearer_access_token'] = bearer
+# def update_bearer(bearer):
+#     """update bearer token in credentials file"""
+#     curr = None
+#     with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'r') as fp:
+#         curr = json.load(fp)
+#     # update dict with new bearer
+#     curr['bearer_access_token'] = bearer
 
-    # write obj with new bearer to file
-    with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'w') as fp:
-        json.dump(fp=fp, obj=curr)
+#     # write obj with new bearer to file
+#     with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'w') as fp:
+#         json.dump(fp=fp, obj=curr)
 
-def get_oauth_token(creds):
-    oauth_endpoint = 'https://id.twitch.tv/oauth2/token'
-    PARAMS = {
-        'client_id': creds['client_id'],
-        'client_secret': creds['client_secret'],
-        'grant_type': 'client_credentials'
-    }
-    r = requests.post(url=oauth_endpoint, params=PARAMS)
-    return r.json().get('access_token')
+# def get_oauth_token(creds):
+#     oauth_endpoint = 'https://id.twitch.tv/oauth2/token'
+#     PARAMS = {
+#         'client_id': creds['client_id'],
+#         'client_secret': creds['client_secret'],
+#         'grant_type': 'client_credentials'
+#     }
+#     r = requests.post(url=oauth_endpoint, params=PARAMS)
+#     return r.json().get('access_token')
 
 # Possibly use dropdown on front-end to get the gameName
 def get_game_id(gameName, credentials):
@@ -296,9 +297,9 @@ def all_in_one():
 
 
 def main():
-    creds = get_credentials()
-    new_oauth_token = get_oauth_token(creds)
-    update_bearer(new_oauth_token)
+    creds = auth.get_credentials()
+    new_oauth_token = auth.get_oauth_token(creds)
+    auth.update_bearer(new_oauth_token)
 
 if __name__ == "__main__":
     main()
