@@ -45,131 +45,105 @@ class Clip:
         self.streamerName = streamerName
         self.filename = filename
 
-# # General functions go below here
-# def get_credentials():
-#     with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'r') as fp:
-#         return json.load(fp)
 
-# def update_bearer(bearer):
-#     """update bearer token in credentials file"""
-#     curr = None
-#     with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'r') as fp:
-#         curr = json.load(fp)
-#     # update dict with new bearer
-#     curr['bearer_access_token'] = bearer
+# # Possibly use dropdown on front-end to get the gameName
+# def get_game_id(gameName, credentials):
+#     gamesAPI = 'https://api.twitch.tv/helix/games'
+#     PARAMS = {'name': gameName}
+#     HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
+#     r = requests.get(url=gamesAPI, params=PARAMS, headers=HEADERS)
+#     data = r.json()
 
-#     # write obj with new bearer to file
-#     with open(f'{os.getcwd()}/secrets/twitch_creds.json', 'w') as fp:
-#         json.dump(fp=fp, obj=curr)
+#     if data['data'] == []:
+#         # SHOW THIS TO USER WHEN THEY TRY TO SUBMIT
+#         raise Exception(f'*****COULD NOT RESOLVE GAMEID FOR {gameName}*****')
+#     else:
+#         gameId = data['data'][0]['id']
+#         Clip.gameName = gameName
 
-# def get_oauth_token(creds):
-#     oauth_endpoint = 'https://id.twitch.tv/oauth2/token'
-#     PARAMS = {
-#         'client_id': creds['client_id'],
-#         'client_secret': creds['client_secret'],
-#         'grant_type': 'client_credentials'
-#     }
-#     r = requests.post(url=oauth_endpoint, params=PARAMS)
-#     return r.json().get('access_token')
+#     return gameId
 
-# Possibly use dropdown on front-end to get the gameName
-def get_game_id(gameName, credentials):
-    gamesAPI = 'https://api.twitch.tv/helix/games'
-    PARAMS = {'name': gameName}
-    HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
-    r = requests.get(url=gamesAPI, params=PARAMS, headers=HEADERS)
-    data = r.json()
+# # game_id, pastDays, numClips, language <-- all vars declared on program start
+# def get_clip_info(credentials, game_id, pastDays=7, numClips = 20, first = 50, cursor = None, language =None):
+#     print(f'Language to be used is: {language}')
+#     # Get current time in RFC3339 format with T and Z
+#     timeNow = datetime.now().isoformat()
+#     timeNow = timeNow.split('.')[0]
+#     timeNow = timeNow + "Z"
+#     timeNow = datetime.strptime(timeNow, '%Y-%m-%dT%H:%M:%SZ')
 
-    if data['data'] == []:
-        # SHOW THIS TO USER WHEN THEY TRY TO SUBMIT
-        raise Exception(f'*****COULD NOT RESOLVE GAMEID FOR {gameName}*****')
-    else:
-        gameId = data['data'][0]['id']
-        Clip.gameName = gameName
+#     # Subtract current time by 7 days to get startDate (lower bounds of date to look for clips)
+#     startDate = timeNow - timedelta(pastDays)
+#     startDate = startDate.isoformat()
+#     startDate = startDate + "Z"
+#     # Example of startDate variable:
+#     # 2021-06-28T10:53:47Z
+#     # Use startData var for started_at query parameter for twitch clip api calls
 
-    return gameId
-
-# game_id, pastDays, numClips, language <-- all vars declared on program start
-def get_clip_info(credentials, game_id, pastDays=7, numClips = 20, first = 50, cursor = None, language =None):
-    print(f'Language to be used is: {language}')
-    # Get current time in RFC3339 format with T and Z
-    timeNow = datetime.now().isoformat()
-    timeNow = timeNow.split('.')[0]
-    timeNow = timeNow + "Z"
-    timeNow = datetime.strptime(timeNow, '%Y-%m-%dT%H:%M:%SZ')
-
-    # Subtract current time by 7 days to get startDate (lower bounds of date to look for clips)
-    startDate = timeNow - timedelta(pastDays)
-    startDate = startDate.isoformat()
-    startDate = startDate + "Z"
-    # Example of startDate variable:
-    # 2021-06-28T10:53:47Z
-    # Use startData var for started_at query parameter for twitch clip api calls
-
-    # Call twitch api to get thumbnail url, broadcaster name, game id
-    counter = 1
-    clips = []
+#     # Call twitch api to get thumbnail url, broadcaster name, game id
+#     counter = 1
+#     clips = []
 
 
-    # Keep paginating through twitch clips API until 20 valid clips
-    while len(clips) < numClips:
-        print(f'Query #{counter} for valid clips')
-        clipsAPI = 'https://api.twitch.tv/helix/clips'
-        PARAMS = {'game_id': game_id, 'started_at': startDate, 'first': first, 'after': cursor}
-        HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
-        r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
-        data = r.json()
+#     # Keep paginating through twitch clips API until 20 valid clips
+#     while len(clips) < numClips:
+#         print(f'Query #{counter} for valid clips')
+#         clipsAPI = 'https://api.twitch.tv/helix/clips'
+#         PARAMS = {'game_id': game_id, 'started_at': startDate, 'first': first, 'after': cursor}
+#         HEADERS = {'Client-Id': credentials['twitch_client_id'], 'Authorization': 'Bearer ' + credentials['access_bearer_token']}
+#         r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
+#         data = r.json()
 
 
-        # Take the top 20 clips returned by clips api
-        if language == None:
-            for item in data['data']:
-                cursor = data['pagination']['cursor']
-                if len(clips) < numClips:
-                    counter += 1
-                    filename = Clip.gameName + item['broadcaster_name'] + str(counter) + '.mp4'
-                    downloadLink = item['thumbnail_url'].split('-preview-')[0] + '.mp4'
-                    clipObj = Clip(downloadLink, item['broadcaster_name'], filename)
-                    clips.append(clipObj)
+#         # Take the top 20 clips returned by clips api
+#         if language == None:
+#             for item in data['data']:
+#                 cursor = data['pagination']['cursor']
+#                 if len(clips) < numClips:
+#                     counter += 1
+#                     filename = Clip.gameName + item['broadcaster_name'] + str(counter) + '.mp4'
+#                     downloadLink = item['thumbnail_url'].split('-preview-')[0] + '.mp4'
+#                     clipObj = Clip(downloadLink, item['broadcaster_name'], filename)
+#                     clips.append(clipObj)
 
-        elif language[:2] == 'en':
-            for item in data['data']:
-                cursor = data['pagination']['cursor']
-                if len(clips) < numClips and item['language'] == language[:2]:
-                    counter += 1
-                    filename = Clip.gameName + item['broadcaster_name'] + str(counter) + '.mp4'
-                    downloadLink = item['thumbnail_url'].split('-preview-')[0] + '.mp4'
-                    clipObj = Clip(downloadLink, item['broadcaster_name'], filename)
-                    clips.append(clipObj)
+#         elif language[:2] == 'en':
+#             for item in data['data']:
+#                 cursor = data['pagination']['cursor']
+#                 if len(clips) < numClips and item['language'] == language[:2]:
+#                     counter += 1
+#                     filename = Clip.gameName + item['broadcaster_name'] + str(counter) + '.mp4'
+#                     downloadLink = item['thumbnail_url'].split('-preview-')[0] + '.mp4'
+#                     clipObj = Clip(downloadLink, item['broadcaster_name'], filename)
+#                     clips.append(clipObj)
 
-    print('Done getting clip info...')
-    return clips
+#     print('Done getting clip info...')
+#     return clips
 
 
-def download_clips(clips, videoStruct):
-    counter = 0
-    global downloadPath
-    basePath = os.path.join(os.getcwd(), 'clips')
-    if not os.path.exists(basePath):
-        os.mkdir(basePath)
-    downloadPath = os.path.join(basePath, Clip.gameName)
-    if not os.path.exists(downloadPath):
-        os.mkdir(downloadPath)
+# def download_clips(clips, videoStruct):
+#     counter = 0
+#     global downloadPath
+#     basePath = os.path.join(os.getcwd(), 'clips')
+#     if not os.path.exists(basePath):
+#         os.mkdir(basePath)
+#     downloadPath = os.path.join(basePath, Clip.gameName)
+#     if not os.path.exists(downloadPath):
+#         os.mkdir(downloadPath)
 
-    for clip in clips:
-        r = requests.get(clip.downloadLink, allow_redirects=True)
-        videoStruct.streamers.append(clip.streamerName)
-        with open(os.path.join(downloadPath, clip.filename), 'wb') as fp:
-            try:
-                fp.write(r.content)
-                print(f'Downloading clip {str(counter + 1)} of {len(clips)} to {os.path.join(downloadPath, clip.filename)}')
-            except:
-                print("except block executed")
+#     for clip in clips:
+#         r = requests.get(clip.downloadLink, allow_redirects=True)
+#         videoStruct.streamers.append(clip.streamerName)
+#         with open(os.path.join(downloadPath, clip.filename), 'wb') as fp:
+#             try:
+#                 fp.write(r.content)
+#                 print(f'Downloading clip {str(counter + 1)} of {len(clips)} to {os.path.join(downloadPath, clip.filename)}')
+#             except:
+#                 print("except block executed")
 
-        counter += 1
-    videoStruct.unique_streamers()
-    print(f'Here are the unique streamers:\n{videoStruct.streamers}')
-    print(f'Finished downloading {counter} clips for {Clip.gameName}!')
+#         counter += 1
+#     videoStruct.unique_streamers()
+#     print(f'Here are the unique streamers:\n{videoStruct.streamers}')
+#     print(f'Finished downloading {counter} clips for {Clip.gameName}!')
 
 
 def combine_clips(clips, transition):
@@ -298,8 +272,7 @@ def all_in_one():
 
 def main():
     creds = auth.get_credentials()
-    new_oauth_token = auth.get_oauth_token(creds)
-    auth.update_bearer(new_oauth_token)
+
 
 if __name__ == "__main__":
     main()

@@ -34,6 +34,7 @@ def get_credentials():
 
 def update_bearer(bearer):
     """update bearer token in credentials file"""
+    print('Generating new bearer access token')
     curr = None
     with open(SECRETS_PATH, 'r') as fp:
         curr = json.load(fp)
