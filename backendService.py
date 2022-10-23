@@ -10,40 +10,40 @@ import os
 import socket
 import helpers.auth as auth
 
-# Data structure for the final video, used to populate information in Youtube Upload API
-class VideoObj:
-    def __init__(self, gameName, filename, videoTitle, thumbnail, tags, description, privacyStatus, streamers=[]):
-        self.gameName = gameName
-        self.filename = filename
-        self.videoTitle = videoTitle
-        self.streamers = streamers
-        self.thumbnail = thumbnail
-        self.tags = tags
-        self.description = description
-        self.privacyStatus = privacyStatus
+# # Data structure for the final video, used to populate information in Youtube Upload API
+# class VideoObj:
+#     def __init__(self, gameName, filename, videoTitle, thumbnail, tags, description, privacyStatus, streamers=[]):
+#         self.gameName = gameName
+#         self.filename = filename
+#         self.videoTitle = videoTitle
+#         self.streamers = streamers
+#         self.thumbnail = thumbnail
+#         self.tags = tags
+#         self.description = description
+#         self.privacyStatus = privacyStatus
     
-    def __str__(self):
-        return f'{self.gameName}\n{self.filename}\n{self.videoTitle}\n{self.thumbnail}\n{self.tags}\n{self.desription}\n{self.streamers}'
+#     def __str__(self):
+#         return f'{self.gameName}\n{self.filename}\n{self.videoTitle}\n{self.thumbnail}\n{self.tags}\n{self.desription}\n{self.streamers}'
 
-    def unique_streamers(self):
-        self.streamers = list(set(self.streamers))
+#     def unique_streamers(self):
+#         self.streamers = list(set(self.streamers))
     
-    def set_default_description(self):
-        streamerCredit = ''
-        for streamer in self.streamers:
-            streamer = "https://www.twitch.tv/" + streamer
-            streamerCredit = streamerCredit + "\n" + streamer
+#     def set_default_description(self):
+#         streamerCredit = ''
+#         for streamer in self.streamers:
+#             streamer = "https://www.twitch.tv/" + streamer
+#             streamerCredit = streamerCredit + "\n" + streamer
 
-        self.description = f'{self.videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}'
+#         self.description = f'{self.videoTitle}\n\nMake sure to support the streamers in the video!\n{streamerCredit}'
             
 
-# Data structure for each individual clip
-class Clip:
-    gameName = ''
-    def __init__(self, downloadLink, streamerName, filename):
-        self.downloadLink = downloadLink
-        self.streamerName = streamerName
-        self.filename = filename
+# # Data structure for each individual clip
+# class Clip:
+#     gameName = ''
+#     def __init__(self, downloadLink, streamerName, filename):
+#         self.downloadLink = downloadLink
+#         self.streamerName = streamerName
+#         self.filename = filename
 
 
 # # Possibly use dropdown on front-end to get the gameName
