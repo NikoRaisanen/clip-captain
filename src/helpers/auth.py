@@ -2,7 +2,8 @@ import requests
 import json
 import os
 
-SECRETS_PATH = f'{os.getcwd()}/secrets/twitch_creds.json'
+# TODO: Make the whole path thing more elegant
+SECRETS_PATH = f'{os.getcwd()}/src/secrets/twitch_creds.json'
 def get_credentials():
     current_creds = {}
     try:

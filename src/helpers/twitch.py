@@ -3,12 +3,11 @@ import requests
 import json
 import os
 import datetime
-import auth
 
 
 # Data structure for the final video, used to populate information in Youtube Upload API
 class Video:
-    def __init__(self, game_name, filename, title, thumbnail, tags=None, description=None, privacy_status='unlisted', streamers=None, clips=None):
+    def __init__(self, game_name=None, filename=None, title=None, thumbnail=None, tags=None, description=None, privacy_status='unlisted', streamers=None, clips=None):
         self.game_name = game_name
         self.filename = filename
         self.title = title
@@ -23,7 +22,7 @@ class Video:
         return f'{self.game_name}\n{self.filename}\n{self.title}\n{self.thumbnail}\n{self.tags}\n{self.description}\n{self.streamers}'
 
     def get_unique_streamers(self):
-        self.streamers = list(set(self.streamers))
+        return list(set(self.streamers))
   
     def set_default_description(self):
         credit = ''
@@ -111,30 +110,27 @@ def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first =
     return clips
 
 
-# def download_clips(clips, videoStruct):
-#     counter = 0
-#     global downloadPath
-#     basePath = os.path.join(os.getcwd(), 'clips')
-#     if not os.path.exists(basePath):
-#         os.mkdir(basePath)
-#     downloadPath = os.path.join(basePath, Clip.gameName)
-#     if not os.path.exists(downloadPath):
-#         os.mkdir(downloadPath)
+def download_clips(clips, video, game_name):
+    counter = 0
+    base_path = os.path.join(os.getcwd(), 'clips')
+    if not os.path.exists(base_path):
+        os.mkdir(base_path)
+    download_path = os.path.join(base_path, game_name)
+    if not os.path.exists(download_path):
+        os.mkdir(download_path)
 
-#     for clip in clips:
-#         r = requests.get(clip.downloadLink, allow_redirects=True)
-#         videoStruct.streamers.append(clip.streamerName)
-#         with open(os.path.join(downloadPath, clip.filename), 'wb') as fp:
-#             try:
-#                 fp.write(r.content)
-#                 print(f'Downloading clip {str(counter + 1)} of {len(clips)} to {os.path.join(downloadPath, clip.filename)}')
-#             except:
-#                 print("except block executed")
+    for clip in clips:
+        counter += 1
+        r = requests.get(clip.download_link, allow_redirects=True)
+        video.streamers.append(clip.streamer_name)
+        with open(os.path.join(download_path, clip.filename), 'wb') as fp:
+            # removed try block
+            fp.write(r.content)
+            print(f'Downloading clip {counter} of {len(clips)} to {os.path.join(download_path, clip.filename)}')
 
-#         counter += 1
-#     videoStruct.unique_streamers()
-#     print(f'Here are the unique streamers:\n{videoStruct.streamers}')
-#     print(f'Finished downloading {counter} clips for {Clip.gameName}!')
+    video.streamers = video.get_unique_streamers()
+    print(f'Here are the unique streamers:\n{video.streamers}')
+    print(f'Finished downloading {counter} clips for {game_name}!')
 
 def get_clips(creds=None, game_name=None, past_days=7, num_clips=20, first=20):
     """Wrapper function to perform all helpers"""
@@ -145,6 +141,17 @@ def get_clips(creds=None, game_name=None, past_days=7, num_clips=20, first=20):
     clips = get_clip_info(creds, game_id, past_days, num_clips, first)
     return clips
 
+
+# GET THE BELOW INFORMATION FROM USER ON WEBPAGE
+    gameName = 'Hearthstone'
+    Clip.gameName = gameName
+    filename = Clip.gameName + '.mp4' # dont need this, will be dynamic and set by download fx
+    videoTitle = 'My Video #1' # get from params
+    thumbnail = '[link to thumbnail]' # optional... get from params
+    tags = ['valorant', 'top', 'plays'] # optional... get from params
+    description = '' #optional... get from params
+    privacyStatus = 'private'
+    transition = 'assets/tvstatictransition.mp4'
 
 if __name__ == '__main__':
     creds = auth.get_credentials()
