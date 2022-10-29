@@ -140,21 +140,3 @@ def get_clips(creds=None, game_name=None, past_days=7, num_clips=20, first=20, l
     game_id = get_game_id(creds, game_name)
     clips = get_clip_info(creds, game_id, past_days, num_clips, first, language)
     return clips
-
-
-# GET THE BELOW INFORMATION FROM USER ON WEBPAGE
-    gameName = 'Hearthstone'
-    Clip.gameName = gameName
-    filename = Clip.gameName + '.mp4' # dont need this, will be dynamic and set by download fx
-    videoTitle = 'My Video #1' # get from params
-    thumbnail = '[link to thumbnail]' # optional... get from params
-    tags = ['valorant', 'top', 'plays'] # optional... get from params
-    description = '' #optional... get from params
-    privacyStatus = 'private'
-    transition = 'assets/tvstatictransition.mp4'
-
-if __name__ == '__main__':
-    creds = auth.get_credentials()
-    clips = get_clips(creds, game_name='dota 2')
-    print(clips)
-    print(len(clips))
