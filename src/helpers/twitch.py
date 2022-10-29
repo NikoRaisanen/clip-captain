@@ -1,37 +1,7 @@
-from time import time
 import requests
-import json
 import os
 import datetime
 
-
-# Data structure for the final video, used to populate information in Youtube Upload API
-class Video:
-    def __init__(self, game_name=None, filename=None, title=None, thumbnail=None, tags=None, description=None, privacy_status='unlisted', streamers=None, clips=None):
-        self.game_name = game_name
-        self.filename = filename
-        self.title = title
-        self.streamers = streamers
-        self.thumbnail = thumbnail
-        self.tags = tags
-        self.description = description
-        self.privacy_status = privacy_status
-        self.clips = clips
-
-    def __str__(self):
-        return f'{self.game_name}\n{self.filename}\n{self.title}\n{self.thumbnail}\n{self.tags}\n{self.description}\n{self.streamers}'
-
-    def get_unique_streamers(self):
-        return list(set(self.streamers))
-  
-    def set_default_description(self):
-        credit = ''
-        for streamer in self.streamers:
-            link = f'https://www.twitch.tv/{streamer}'
-            credit = f'{credit}\n{link}'
-
-        self.description = f'{self.title}\n\nMake sure to support the streamers in the video!\n{credit}'
-          
 
 # Data structure for each individual clip
 class Clip:
@@ -42,9 +12,9 @@ class Clip:
         self.filename = filename
 
         
-# Possibly use dropdown on front-end to get the gameName
-# Consider printing a mapping of gameId to gameName in console.
+# TODO: Consider printing a mapping of gameId to gameName in console.
 def get_game_id(creds, name):
+    """Get id from game name for future api calls"""
     games_endpoint = 'https://api.twitch.tv/helix/games'
     PARAMS = {'name': name}
     HEADERS = {'Client-Id': creds['client_id'], 'Authorization': f'Bearer {creds["bearer_access_token"]}'}
@@ -57,7 +27,6 @@ def get_game_id(creds, name):
         raise KeyError(f'Cannot find game id for {name}, try adding or removing spaces')
 
 
-# game_id, pastDays, numClips, first, language <-- all vars declared on program start
 # first param must be <= 50
 def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None, language=None):
     """
@@ -110,7 +79,12 @@ def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first =
     return clips
 
 
-def download_clips(clips, video, game_name):
+def get_creator_names(clips):
+    return [x.streamer_name for x in clips]
+
+
+def download_clips(clips, game_name):
+    """Download clips"""
     counter = 0
     base_path = os.path.join(os.getcwd(), 'clips')
     if not os.path.exists(base_path):
@@ -122,21 +96,16 @@ def download_clips(clips, video, game_name):
     for clip in clips:
         counter += 1
         r = requests.get(clip.download_link, allow_redirects=True)
-        video.streamers.append(clip.streamer_name)
         with open(os.path.join(download_path, clip.filename), 'wb') as fp:
-            # removed try block
             fp.write(r.content)
             print(f'Downloading clip {counter} of {len(clips)} to {os.path.join(download_path, clip.filename)}')
 
-    video.streamers = video.get_unique_streamers()
-    print(f'Here are the unique streamers:\n{video.streamers}')
-    print(f'Finished downloading {counter} clips for {game_name}!')
-
+    
 def get_clips(creds=None, game_name=None, past_days=7, num_clips=20, first=20, language=None):
-    """Wrapper function to perform all helpers"""
+    """Wrapper function to perform all Twitch functionality"""
     # TODO: This should return array of Clip objects
-    # Video object will be created later
-    # vid = Video()
+    # Video object will be created laters
     game_id = get_game_id(creds, game_name)
     clips = get_clip_info(creds, game_id, past_days, num_clips, first, language)
+    download_clips(clips, game_name)
     return clips

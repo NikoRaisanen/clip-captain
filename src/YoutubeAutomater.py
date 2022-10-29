@@ -13,6 +13,43 @@ import helpers.twitch as twitch
 import helpers.cli as cli
 
 
+# Data structure for the final video, used to populate information in Youtube Upload API
+class Video:
+    def __init__(self, game_name=None, title=None, thumbnail=None, tags=None, description=None, privacy_status='unlisted', streamers=None, clips=None):
+        self.game_name = game_name
+        self.title = title
+        self.streamers = streamers
+        self.thumbnail = thumbnail
+        self.tags = tags
+        self.description = description
+        self.privacy_status = privacy_status
+        self.clips = clips
+        # filename is dynamically set
+        self.filename = ''
+
+    def __str__(self):
+        return f'''
+        Game: {self.game_name}
+        Title: {self.title}
+        Thumbnail: {self.thumbnail}
+        Tags: {self.tags}
+        Description: {self.description}
+        Creators: {self.streamers}
+        Filename: {self.filename}
+        '''
+
+    def get_unique_streamers(self):
+        return list(set(self.streamers))
+  
+    def set_default_description(self):
+        credit = ''
+        for streamer in self.streamers:
+            link = f'https://www.twitch.tv/{streamer}'
+            credit = f'{credit}\n{link}'
+
+        self.description = f'{self.title}\n\nMake sure to support the streamers in the video!\n{credit}'
+          
+        
 def combine_clips(clips, transition):
     videoObjects = []
     for clip in clips:
@@ -141,8 +178,9 @@ def main():
     args = cli.start()
     creds = auth.get_credentials()
     clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
-    print(clips)
-
+    creators = twitch.get_creator_names(clips)
+    vid = Video(args.game, args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
+    
 
 if __name__ == "__main__":
     main()
