@@ -9,7 +9,8 @@ from datetime import datetime
 import os
 import socket
 import helpers.auth as auth
-import helpers.twitch as twitch 
+import helpers.twitch as twitch
+import helpers.cli as cli
 
 
 def combine_clips(clips, transition):
@@ -137,8 +138,9 @@ def upload_video(service, videoStruct):
 
 
 def main():
+    args = cli.start()
     creds = auth.get_credentials()
-    clips = twitch.get_clips(creds, game_name='dota 2')
+    clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
     print(clips)
 
 

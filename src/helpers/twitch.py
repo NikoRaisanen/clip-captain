@@ -132,13 +132,13 @@ def download_clips(clips, video, game_name):
     print(f'Here are the unique streamers:\n{video.streamers}')
     print(f'Finished downloading {counter} clips for {game_name}!')
 
-def get_clips(creds=None, game_name=None, past_days=7, num_clips=20, first=20):
+def get_clips(creds=None, game_name=None, past_days=7, num_clips=20, first=20, language=None):
     """Wrapper function to perform all helpers"""
     # TODO: This should return array of Clip objects
     # Video object will be created later
     # vid = Video()
     game_id = get_game_id(creds, game_name)
-    clips = get_clip_info(creds, game_id, past_days, num_clips, first)
+    clips = get_clip_info(creds, game_id, past_days, num_clips, first, language)
     return clips
 
 
