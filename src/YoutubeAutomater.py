@@ -1,5 +1,5 @@
 #!/bin/python
-import requests, json, os
+import requests, json
 from datetime import datetime, timedelta
 from moviepy.editor import *
 from googleapiclient.http import MediaFileUpload
@@ -11,8 +11,10 @@ import socket
 import helpers.auth as auth
 import helpers.twitch as twitch
 import helpers.cli as cli
+import helpers.youtube as yt
 
 
+YT_CREDS = f'{os.getcwd()}/src/secrets/youtube_creds.json'
 # Data structure for the final video, used to populate information in Youtube Upload API
 class Video:
     def __init__(self, game_name=None, title=None, thumbnail=None, tags=None, description=None, privacy_status='unlisted', streamers=None, clips=None):
@@ -60,6 +62,7 @@ def combine_clips(clips, transition):
         video = CompositeVideoClip([video, txt_clip]).set_duration(video.duration)
         videoObjects.append(video)
 
+    # TODO: check if the custom transition exists
     if transition == '':
         transition = 'assets/tvstatictransition.mp4'
     else:
@@ -79,83 +82,6 @@ def combine_clips(clips, transition):
     final.write_videofile(os.path.join(os.getcwd(), 'finalVideos', videoName), fps=60, bitrate="6000k", threads=2)
     return os.path.join(os.getcwd(), 'finalVideos', videoName)
 
-
-def get_authenticated_service():    
-    CLIENT_SECRET_FILE = 'client_secret.json'
-    API_NAME = 'youtube'
-    API_VERSION = 'v3'
-    SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
-    # Authenticate on each request for web version
-    flow = InstalledAppFlow.from_client_secrets_file(
-        CLIENT_SECRET_FILE,
-        scopes=SCOPES)
-    print('Select the google account where you would like to upload the video')
-    credentials = flow.run_local_server()
-
-    service = build(API_NAME, API_VERSION, credentials=credentials)
-    return service
-
-
-def upload_video(service, videoStruct):
-    socket.setdefaulttimeout(100000)
-    if videoStruct.description != '':
-        pass    # no additional handling needed
-    else:
-        videoStruct.set_default_description()
-
-
-    request_body = {
-        'snippet': {
-            'title': videoStruct.videoTitle,
-            'categoryId': '20',
-            'description': videoStruct.description,
-            'tags': videoStruct.tags,
-            'defaultLanguage': 'en'
-        },
-        'status': {
-            'privacyStatus': videoStruct.privacyStatus,
-            'selfDeclaredMadeForKids': False
-        },
-        'notifySubscribers': False
-    }
-    mediaFile = MediaFileUpload(videoStruct.filename)
-    print(f'Uploading the following file: {videoStruct.filename}')
-
-
-    print(f'Uploading video with the following information...\n{request_body}')
-    print(mediaFile)
-    response_upload = service.videos().insert(
-        part = 'snippet,status',
-        body = request_body,
-        media_body = mediaFile
-    ).execute()
-    # Set thumbnail if valid file
-    try:
-        service.thumbnails().set(
-            videoId=response_upload.get('id'),
-            media_body=MediaFileUpload(videoStruct.thumbnail)
-        ).execute()
-    except FileNotFoundError:
-        print(f'{videoStruct.thumbnail} could not be found, using auto-generated thumbnail!')
-
-    print('Upload complete!')
-    # END UPLOAD TO YOUTUBE
-
-# def all_in_one():
-#     beginTime = datetime.now()
-#     # Increase socket default timemout due to connection dropping during large file uploads
-#     socket.setdefaulttimeout(100000)
-
-#     # GET THE BELOW INFORMATION FROM USER ON WEBPAGE
-#     gameName = 'Hearthstone'
-#     Clip.gameName = gameName
-#     filename = Clip.gameName + '.mp4'
-#     videoTitle = 'My Video #1'
-#     thumbnail = '[link to thumbnail]' # optional
-#     tags = ['valorant', 'top', 'plays']
-#     description = '' #optional
-#     privacyStatus = 'private'
-#     transition = 'assets/tvstatictransition.mp4'
 
 #     # Creating Video Object
 #     videoStruct = VideoObj(gameName, filename, videoTitle, thumbnail, tags, description, privacyStatus)
@@ -180,6 +106,13 @@ def main():
     clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
+
+    # Go through oauth flow
+    yt_service = yt.get_authenticated_service(YT_CREDS)
+
+    # TODO: Add video creation steps here
+
+    yt.upload_video(yt_service, vid)
     
 
 if __name__ == "__main__":

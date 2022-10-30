@@ -140,3 +140,4 @@ cython_debug/
 # Private stuff, credentials, etc.
 /clips/*
 twitch_creds.json
+youtube_creds.json
