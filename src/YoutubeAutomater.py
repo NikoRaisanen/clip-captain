@@ -12,13 +12,13 @@ import helpers.auth as auth
 import helpers.twitch as twitch
 import helpers.cli as cli
 import helpers.youtube as yt
-import helpers.video_processing as vid_p
+import helpers.video_processing as video_helper
 
 
 YT_CREDS = f'{os.getcwd()}/src/secrets/youtube_creds.json'
 # Data structure for the final video, used to populate information in Youtube Upload API
 class Video:
-    def __init__(self, game_name=None, title=None, thumbnail=None, tags=None, description=None, privacy_status='unlisted', streamers=None, clips=None):
+    def __init__(self, game_name=None, title=None, thumbnail='', tags=None, description=None, privacy_status='unlisted', streamers=None, clips=None):
         self.game_name = game_name
         self.title = title
         self.streamers = streamers
@@ -28,7 +28,7 @@ class Video:
         self.privacy_status = privacy_status
         self.clips = clips
         # filename is dynamically set
-        self.filename = f'{game_name}.mp4'
+        self.filename = ''
 
     def __str__(self):
         return f'''
@@ -53,34 +53,35 @@ class Video:
         self.description = f'{self.title}\n\nMake sure to support the streamers in the video!\n{credit}'
           
         
-# def combine_clips(clips, transition):
-#     videoObjects = []
-#     for clip in clips:
-#         # Add text below:
-#         video = VideoFileClip(os.path.join(downloadPath, clip.filename), target_resolution=(1080,1920))
-#         txt_clip = TextClip(clip.streamerName, fontsize = 60, color = 'white',stroke_color='black',stroke_width=2, font="Fredoka-One")
-#         txt_clip = txt_clip.set_pos((0.8, 0.9), relative=True).set_duration(video.duration)
-#         video = CompositeVideoClip([video, txt_clip]).set_duration(video.duration)
-#         videoObjects.append(video)
+def combine_clips(clips, transition):
+    videoObjects = []
+    for clip in clips:
+        # Add text below:
+        video = VideoFileClip(os.path.join(base_path, clip.filename), target_resolution=(1080,1920))
+        txt_clip = TextClip(clip.streamerName, fontsize = 60, color = 'white',stroke_color='black',stroke_width=2, font="Fredoka-One")
+        txt_clip = txt_clip.set_pos((0.8, 0.9), relative=True).set_duration(video.duration)
+        video = CompositeVideoClip([video, txt_clip]).set_duration(video.duration)
+        videoObjects.append(video)
 
-#     # TODO: check if the custom transition exists
-#     if not transition:
-#         transition = 'assets/tvstatictransition.mp4'
-
-#     print(f'Using {transition} as the transitioning media')
-#     print('done creating list of video objects')
-#     # Make transition clip 1 second long and halve the volume
-#     transition = VideoFileClip(transition).fx(afx.volumex, 0.5)
-#     transition = transition.subclip(0, -1)
-#     # video name based on game
-#     videoName = Clip.gameName + '.mp4'
-#     print('Beginning to concatenate video clips...')
-#     final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
-#     # Create finalVideos folder if it doesn't exist
-#     if not os.path.exists(os.path.join(os.getcwd(), 'finalVideos')):
-#         os.mkdir('finalVideos')
-#     final.write_videofile(os.path.join(os.getcwd(), 'finalVideos', videoName), fps=60, bitrate="6000k", threads=2)
-#     return os.path.join(os.getcwd(), 'finalVideos', videoName)
+    # TODO: check if the custom transition exists
+    if transition == '':
+        transition = 'assets/tvstatictransition.mp4'
+    else:
+        pass
+    print(f'Using {transition} as the transitioning media')
+    print('done creating list of video objects')
+    # Make transition clip 1 second long and halve the volume
+    transition = VideoFileClip(transition).fx(afx.volumex, 0.5)
+    transition = transition.subclip(0, -1)
+    # video name based on game
+    videoName = Clip.gameName + '.mp4'
+    print('Beginning to concatenate video clips...')
+    final = concatenate_videoclips(videoObjects, transition=transition, method='compose')
+    # Create finalVideos folder if it doesn't exist
+    if not os.path.exists(os.path.join(os.getcwd(), 'finalVideos')):
+        os.mkdir('finalVideos')
+    final.write_videofile(os.path.join(os.getcwd(), 'finalVideos', videoName), fps=60, bitrate="6000k", threads=2)
+    return os.path.join(os.getcwd(), 'finalVideos', videoName)
 
 
 #     # Creating Video Object
@@ -103,20 +104,19 @@ class Video:
 def main():
     args = cli.start()
     creds = auth.get_credentials()
-
-    # Go through oauth flow before fetching clips
-    yt_service = yt.get_authenticated_service(YT_CREDS)
     clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
-    print(vid)
+
+    # Go through oauth flow
+    yt_service = yt.get_authenticated_service(YT_CREDS)
 
     # TODO: Add video creation steps here
-    vid_path = vid_p.combine_clips(clips, args.transition_media, vid.filename)
+    vid_path = video_helper.generate_video(clips, args.transition_media, args.game)
+    vid.filename = vid_path
 
     yt.upload_video(yt_service, vid)
     
 
 if __name__ == "__main__":
     main()
-    # TODO: allow the download path for Twitch and Youtube modules to be defined by a constant in this file
