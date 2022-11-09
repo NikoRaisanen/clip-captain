@@ -5,6 +5,7 @@ from moviepy.editor import *
 
 
 def combine_clips(clips, transition, filename):
+    # TODO: abstract out download_path to config.py
     download_path = os.path.join(os.getcwd(), 'clips')
     videos = []
     # set up the composite video that includes streamer name

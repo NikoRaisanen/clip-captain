@@ -16,10 +16,10 @@ import helpers.video_processing as vid_p
 
 YT_CREDS = f'{os.getcwd()}/src/secrets/youtube_creds.json'
 # Data structure for the final video, used to populate information in Youtube Upload API
-# TODO: add support for multiple languages
+# TODO: add support for multiple languages... Language format will be needed for clip downloading and yt video upload
 # TODO: defaults should be set by cli.start(), as such we can remove the default value of None for each param
 class Video:
-    def __init__(self, game_name, title=None, thumbnail=None, tags=None, description=None, privacy_status='private', streamers=None, clips=None):
+    def __init__(self, game_name, title, thumbnail, tags, description, privacy_status, streamers=None, clips=None):
         """Object to store data about the final video"""
         self.game_name = game_name
         self.title = title
