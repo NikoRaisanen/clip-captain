@@ -9,7 +9,6 @@ import socket
 from pathlib import Path
 
 
-
 def get_authenticated_service(creds_path):
     """Local oauth flow, returns authenticated youtube service object"""    
     CLIENT_SECRET_FILE = creds_path
