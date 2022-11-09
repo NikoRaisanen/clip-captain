@@ -68,7 +68,7 @@ def main():
     print(vid)
 
     # TODO: can we abstract vid_path out to the config file?
-    vid_path = vid_p.combine_clips(clips, args.transition_media, vid.filename)
+    vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename)
 
     yt.upload_video(yt_service, vid)
     
