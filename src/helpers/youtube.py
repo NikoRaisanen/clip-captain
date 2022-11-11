@@ -27,7 +27,7 @@ def get_authenticated_service(creds_path):
 
 
 def upload_video(service, video):
-    """Takes in authenticated yt service and custom video classm uploads video to youtube"""
+    """Takes in authenticated yt service and custom video class, uploads video to youtube"""
     socket.setdefaulttimeout(100000)
     if not video.description:
         video.set_default_description()
