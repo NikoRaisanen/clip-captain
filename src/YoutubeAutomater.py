@@ -61,16 +61,15 @@ def main():
     creds = twitch.get_credentials()
 
     # Go through oauth flow before fetching clips
-    yt_service = yt.get_authenticated_service(YT_CREDS)
+    # yt_service = yt.get_authenticated_service(YT_CREDS)
     clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
-    print(vid)
 
     # TODO: can we abstract vid_path out to the config file?
-    vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename)
+    vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename, args.game)
 
-    yt.upload_video(yt_service, vid)
+    # yt.upload_video(yt_service, vid)
     
 
 if __name__ == "__main__":

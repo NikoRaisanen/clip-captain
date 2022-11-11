@@ -2,17 +2,17 @@ import requests
 import os
 import json
 import datetime
-
+import socket
 
 # Data structure for each individual clip
 class Clip:
-    # gameName = ''
     def __init__(self, download_link, streamer_name, filename):
         self.download_link = download_link
         self.streamer_name = streamer_name
         self.filename = filename
 
-
+# TODO: remove this line, needed for plane
+socket.setdefaulttimeout(100000)
 # TODO: abstract out SECRETS_PATH to config
 SECRETS_PATH = f'{os.getcwd()}/src/secrets/twitch_creds.json'
 def get_credentials():
@@ -151,9 +151,10 @@ def get_creator_names(clips):
 
 
 def download_clips(clips, game_name):
-    """Download clips"""
-    counter = 0
+    """Download clips to disk"""
+    # TODO: replace base_path with CLIP_PATH from config
     base_path = os.path.join(os.getcwd(), 'clips')
+    counter = 0
     if not os.path.exists(base_path):
         os.mkdir(base_path)
     download_path = os.path.join(base_path, game_name)

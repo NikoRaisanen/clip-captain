@@ -4,9 +4,9 @@ import requests, json
 from moviepy.editor import *
 
 
-def add_creator_watermark(clips):
+def add_creator_watermark(clips, game_name):
     """Add creator watermark to their respective video(s)"""
-    download_path = os.path.join(os.getcwd(), 'clips')
+    download_path = os.path.join(os.getcwd(), 'clips', game_name)
     videos = []
     # set up the composite video that includes streamer name
     for clip in clips:
@@ -41,8 +41,8 @@ def create_video(videos, transition, filename):
     return os.path.join(os.getcwd(), 'finalVideos', filename)
 
 
-def finalize_video(clips, transition, filename):
+def finalize_video(clips, transition, filename, game_name):
     """Add watermark to clips, stitch videos together with transition"""
-    videos = add_creator_watermark(clips)
+    videos = add_creator_watermark(clips, game_name)
     return create_video(videos, transition, filename)
 
