@@ -54,7 +54,7 @@ class Video:
             credit = f'{credit}\n{link}'
 
         self.description = f'{self.title}\n\nMake sure to support the streamers in the video!\n{credit}'
-
+        
 
 def main():
     args = cli.start()

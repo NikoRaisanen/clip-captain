@@ -41,7 +41,7 @@ def upload_video(service, video):
             'defaultLanguage': 'en'
         },
         'status': {
-            'privacyStatus': video.privacyStatus,
+            'privacyStatus': video.privacy_status,
             'selfDeclaredMadeForKids': False
         },
         'notifySubscribers': False
@@ -51,12 +51,12 @@ def upload_video(service, video):
 
 
     print(f'Uploading video with the following information...\n{request_body}')
-    print(file)
     response_upload = service.videos().insert(
         part = 'snippet,status',
         body = request_body,
         media_body = file
     ).execute()
+    print(f'response_upload: {response_upload}')
     # Set thumbnail if valid file
     try:
         service.thumbnails().set(
