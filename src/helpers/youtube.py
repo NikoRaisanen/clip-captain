@@ -9,8 +9,8 @@ import socket
 from pathlib import Path
 
 
-
-def get_authenticated_service(creds_path):    
+def get_authenticated_service(creds_path):
+    """Local oauth flow, returns authenticated youtube service object"""    
     CLIENT_SECRET_FILE = creds_path
     API_NAME = 'youtube'
     API_VERSION = 'v3'
@@ -27,6 +27,7 @@ def get_authenticated_service(creds_path):
 
 
 def upload_video(service, video):
+    """Takes in authenticated yt service and custom video classm uploads video to youtube"""
     socket.setdefaulttimeout(100000)
     if not video.description:
         video.set_default_description()
@@ -63,6 +64,6 @@ def upload_video(service, video):
             media_body=MediaFileUpload(video.thumbnail)
         ).execute()
     except FileNotFoundError:
-        print(f'{video.thumbnail} could not be found, using auto-generated thumbnail!')
+        print(f'{video.thumbnail} could not be found, not updating thumbnail...')
 
     print('Upload complete!')

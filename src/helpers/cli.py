@@ -18,7 +18,7 @@ def start():
     parser.add_argument("-t", "--tags", type=str, help="Tags for your Youtube video", required=False, default=None)
     parser.add_argument("-d", "--description", type=str, help="Description for your Youtube video", required=False, default=None)
     parser.add_argument("-p", "--privacy-status", type=str, help="Privacy status for your Youtube Video", required=False, default='private', choices=['unlisted', 'private', 'public'])
-    parser.add_argument("-tm", "--transition-media", type=str, help="Language of fetched clips", required=False, default=None)
+    parser.add_argument("-tm", "--transition-media", type=str, help="Path to transition media for combining clips", required=False, default=None)
 
     args = parser.parse_args()
     print(args)
