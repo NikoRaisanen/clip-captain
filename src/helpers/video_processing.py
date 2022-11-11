@@ -2,11 +2,12 @@ import os
 import socket
 import requests, json
 from moviepy.editor import *
+from config import *
 
 
 def add_creator_watermark(clips, game_name):
     """Add creator watermark to their respective video(s)"""
-    download_path = os.path.join(os.getcwd(), 'clips', game_name)
+    download_path = os.path.join(CLIP_PATH, game_name)
     videos = []
     # set up the composite video that includes streamer name
     for clip in clips:
@@ -21,28 +22,24 @@ def add_creator_watermark(clips, game_name):
 
 def create_video(videos, transition, filename):
     """Stitch videos together and save the video to disk"""
-    # TODO: abstract `os.path.join(os.getcwd(), 'finalVideos')` to config
-    # TODO: check if the custom transition exists... also abstract path to the config file
     if not transition:
-        transition = f'{os.getcwd()}/assets/tvstatictransition.mp4'
+        transition = DEFAULT_TRANSITION_PATH
 
     print(f'Using {transition} as the transitioning media')
-    print('done creating list of video objects')
     # Make transition clip 1 second long and halve the volume
     transition = VideoFileClip(transition).fx(afx.volumex, 0.5)
     transition = transition.subclip(0, -1)
     print('Beginning to concatenate video clips...')
     final = concatenate_videoclips(videos, transition=transition, method='compose')
     
-    if not os.path.exists(os.path.join(os.getcwd(), 'finalVideos')):
+    if not os.path.exists(FINAL_VID_PATH):
         os.mkdir('finalVideos')
     # TODO: explore using more threads to speed up the process
-    final.write_videofile(os.path.join(os.getcwd(), 'finalVideos', filename), fps=60, bitrate="6000k", threads=2)
-    return os.path.join(os.getcwd(), 'finalVideos', filename)
+    final.write_videofile(os.path.join(FINAL_VID_PATH, filename), fps=60, bitrate="6000k", threads=2)
+    return os.path.join(FINAL_VID_PATH, filename)
 
 
 def finalize_video(clips, transition, filename, game_name):
     """Add watermark to clips, stitch videos together with transition"""
     videos = add_creator_watermark(clips, game_name)
     return create_video(videos, transition, filename)
-

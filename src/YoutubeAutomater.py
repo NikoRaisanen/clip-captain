@@ -12,9 +12,9 @@ import helpers.twitch as twitch
 import helpers.cli as cli
 import helpers.youtube as yt
 import helpers.video_processing as vid_p
+from config import *
 
 
-YT_CREDS = f'{os.getcwd()}/src/secrets/youtube_creds.json'
 # Data structure for the final video, used to populate information in Youtube Upload API
 # TODO: add support for multiple languages... Language format will be needed for clip downloading and yt video upload
 # TODO: defaults should be set by cli.start(), as such we can remove the default value of None for each param
@@ -61,17 +61,17 @@ def main():
     creds = twitch.get_credentials()
 
     # Go through oauth flow before fetching clips
-    # yt_service = yt.get_authenticated_service(YT_CREDS)
+    yt_service = yt.get_authenticated_service(YT_SECRETS_PATH)
     clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
 
     # TODO: can we abstract vid_path out to the config file?
     vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename, args.game)
+    vid.filename = vid_path
 
-    # yt.upload_video(yt_service, vid)
+    yt.upload_video(yt_service, vid)
     
 
 if __name__ == "__main__":
     main()
-    # TODO: create setup script to fix import issues

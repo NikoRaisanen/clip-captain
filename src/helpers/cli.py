@@ -1,5 +1,4 @@
 import argparse
-from secrets import choice
 
 
 def start():
@@ -21,5 +20,4 @@ def start():
     parser.add_argument("-tm", "--transition-media", type=str, help="Path to transition media for combining clips", required=False, default=None)
 
     args = parser.parse_args()
-    print(args)
     return args

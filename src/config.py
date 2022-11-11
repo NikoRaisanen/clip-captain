@@ -1,18 +1,18 @@
 import os
-# TODO store config-type information here such as
-# Path to each credentials file
-# Path for clip download
-# Path for saving the final video
-# Default transition path
 
-# Path to youtube keys
-YT_CREDS = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json') # rename to YT_SECRET_PATH
 
-# Path to twitch keys
-SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'twitch_creds.json') # rename to TWITCH_SECRET_PATH
+# Path to youtube api keys
+YT_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json') # rename to 
+
+# Path to twitch api keys
+TWITCH_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'twitch_creds.json')
 
 # Path to clip download directory
-download_path = os.path.join(os.getcwd(), 'clips') # rename to CLIP_PATH
+CLIP_PATH = os.path.join(os.getcwd(), 'clips')
 
 # Path to default transition media
 DEFAULT_TRANSITION_PATH = os.path.join(os.getcwd(), 'assets', 'tvstatictransition.mp4')
+
+# Path to final video
+FINAL_VID_PATH = os.path.join(os.getcwd(), 'finalVideos')
+
