@@ -91,7 +91,6 @@ def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first =
     # TODO: allow multi-language support
     # TODO: allow a custom date range for clips, not only pastDays
     print(f'Language to be used is: {language}')
-    # Get current time in RFC3339 format with T and Z
     time_now = datetime.datetime.now()
     start_date = time_now - datetime.timedelta(past_days)
     start_date = start_date.isoformat('T') + 'Z'
@@ -113,19 +112,19 @@ def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first =
         # Take the top 20 clips returned by clips api
         if language is None:
             for item in data['data']:
+                if len(clips) >= num_clips:
+                    break
                 cursor = data['pagination']['cursor']
-                # consider reversing logic. guard clause to break out of loop might be cleaner
-                if len(clips) < num_clips:
-                    creator = item['broadcaster_name']
-                    if creator not in clips_per_creator:
-                        clips_per_creator[creator] = 1
-                    else:
-                        clips_per_creator[creator] += 1
+                creator = item['broadcaster_name']
+                if creator not in clips_per_creator:
+                    clips_per_creator[creator] = 1
+                else:
+                    clips_per_creator[creator] += 1
 
-                    filename = f'{creator}{clips_per_creator[creator]}.mp4'
-                    download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
-                    clip = Clip(download_link, creator, filename)
-                    clips.append(clip)
+                filename = f'{creator}{clips_per_creator[creator]}.mp4'
+                download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
+                clip = Clip(download_link, creator, filename)
+                clips.append(clip)
         else:
             raise Exception('Language options are not yet supported in this program')
 

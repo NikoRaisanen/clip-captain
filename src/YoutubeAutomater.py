@@ -1,13 +1,5 @@
 #!/bin/python
-import requests, json
-from datetime import datetime, timedelta
 from moviepy.editor import *
-from googleapiclient.http import MediaFileUpload
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from datetime import datetime
-import os
-import socket
 import helpers.twitch as twitch
 import helpers.cli as cli
 import helpers.youtube as yt
@@ -17,7 +9,6 @@ from config import *
 
 # Data structure for the final video, used to populate information in Youtube Upload API
 # TODO: add support for multiple languages... Language format will be needed for clip downloading and yt video upload
-# TODO: defaults should be set by cli.start(), as such we can remove the default value of None for each param
 class Video:
     def __init__(self, game_name, title, thumbnail, tags, description, privacy_status, streamers=None, clips=None):
         """Object to store data about the final video"""
@@ -61,7 +52,7 @@ def main():
     creds = twitch.get_credentials()
 
     # Go through oauth flow before fetching clips
-    yt_service = yt.get_authenticated_service(YT_SECRETS_PATH)
+    # yt_service = yt.get_authenticated_service(YT_SECRETS_PATH)
     clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
