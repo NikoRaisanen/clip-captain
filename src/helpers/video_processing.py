@@ -2,7 +2,7 @@ import os
 import socket
 import requests, json
 from moviepy.editor import *
-from config import *
+from config import CLIP_PATH, DEFAULT_TRANSITION_PATH, FINAL_VID_PATH
 
 
 def add_creator_watermark(clips, game_name):

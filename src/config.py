@@ -16,3 +16,5 @@ DEFAULT_TRANSITION_PATH = os.path.join(os.getcwd(), 'assets', 'tvstatictransitio
 # Path to final video
 FINAL_VID_PATH = os.path.join(os.getcwd(), 'finalVideos')
 
+# Language options of twitch clips
+VALID_LANGUAGES = ['en', 'es', 'fr', 'ru', 'ko', 'sv', 'pt', 'da']

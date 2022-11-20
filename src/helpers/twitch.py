@@ -3,7 +3,7 @@ import os
 import json
 import datetime
 import socket
-from config import *
+from config import TWITCH_SECRETS_PATH, CLIP_PATH
 
 # Data structure for each individual clip
 class Clip:
@@ -83,12 +83,14 @@ def get_game_id(creds, name):
 
 
 # first param must be <= 50
-def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None, language=None):
+def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None):
     """
     Returns list of Clip objects that contains the following info for
     each video clip: filename, download link, and name of creator
     """
     # TODO: allow multi-language support
+    ### Api uses ISO 639-1 language codes
+    # https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
     # TODO: allow a custom date range for clips, not only pastDays
     print(f'Language to be used is: {language}')
     time_now = datetime.datetime.now()
@@ -111,7 +113,11 @@ def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first =
 
         # Take the top 20 clips returned by clips api
         if language is None:
+            raise ValueError('Language must be explicitly set')
+        else:
             for item in data['data']:
+                if item['language'] != language:
+                    continue
                 if len(clips) >= num_clips:
                     break
                 cursor = data['pagination']['cursor']
@@ -125,8 +131,7 @@ def get_clip_info(creds=None, game_id=None, past_days=7, num_clips = 20, first =
                 download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
                 clip = Clip(download_link, creator, filename)
                 clips.append(clip)
-        else:
-            raise Exception('Language options are not yet supported in this program')
+    
 
     print('Done getting clip info...')
     return clips
@@ -153,9 +158,9 @@ def download_clips(clips, game_name):
             print(f'Downloading clip {counter} of {len(clips)} to {os.path.join(download_path, clip.filename)}')
 
     
-def get_clips(creds=None, game_name=None, past_days=7, num_clips=20, first=20, language=None):
+def get_clips(language, creds=None, game_name=None, past_days=7, num_clips=20, first=20):
     """Wrapper function to perform all Twitch functionality"""
     game_id = get_game_id(creds, game_name)
-    clips = get_clip_info(creds, game_id, past_days, num_clips, first, language)
+    clips = get_clip_info(language, creds, game_id, past_days, num_clips, first)
     download_clips(clips, game_name)
     return clips
