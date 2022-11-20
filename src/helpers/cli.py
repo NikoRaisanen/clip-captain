@@ -9,7 +9,7 @@ def start():
     parser.add_argument("-pd", "--past-days", type=int, help="Get clips from the past X days", required=False, default=7)
     parser.add_argument("-n", "--num-clips", type=int, help="Number of clips to be used in your video", required=False, default=20)
     parser.add_argument("-f", "--first", type=int, help="Fetch X clips on each Twitch api call", required=False, default=20)
-    parser.add_argument("-l", "--language", type=str, help="Language of fetched clips", required=False, default=None)
+    parser.add_argument("-l", "--language", type=str, help="Language of fetched clips", required=False, default='en')
 
     # Params for Youtube Video
     parser.add_argument("-vt", "--video-title", type=str, help="Title of your Youtube video", required=True)

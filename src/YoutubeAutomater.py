@@ -10,10 +10,11 @@ from config import *
 # Data structure for the final video, used to populate information in Youtube Upload API
 # TODO: add support for multiple languages... Language format will be needed for clip downloading and yt video upload
 class Video:
-    def __init__(self, game_name, title, thumbnail, tags, description, privacy_status, streamers=None, clips=None):
+    def __init__(self, game_name, language, title, thumbnail, tags, description, privacy_status, streamers=None, clips=None):
         """Object to store data about the final video"""
         self.game_name = game_name
         self.title = title
+        self.language = language
         self.streamers = streamers
         self.thumbnail = thumbnail
         self.tags = tags
@@ -52,10 +53,10 @@ def main():
     creds = twitch.get_credentials()
 
     # Go through oauth flow before fetching clips
-    # yt_service = yt.get_authenticated_service(YT_SECRETS_PATH)
+    yt_service = yt.get_authenticated_service(YT_SECRETS_PATH)
     clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
-    vid = Video(args.game, args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
+    vid = Video(args.game, args.video_title, args.language, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
 
     # TODO: can we abstract vid_path out to the config file?
     vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename, args.game)
@@ -63,6 +64,10 @@ def main():
 
     yt.upload_video(yt_service, vid)
     
+    ### Games to start automating
+    # OW 2 (multiple languages)
+    # Call of Duty
+    # Crypto
 
 if __name__ == "__main__":
     main()
