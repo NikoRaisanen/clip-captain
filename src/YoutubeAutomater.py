@@ -4,7 +4,7 @@ import helpers.twitch as twitch
 import helpers.cli as cli
 import helpers.youtube as yt
 import helpers.video_processing as vid_p
-from config import *
+from config import VALID_LANGUAGES
 
 
 # Data structure for the final video, used to populate information in Youtube Upload API
@@ -46,15 +46,21 @@ class Video:
             credit = f'{credit}\n{link}'
 
         self.description = f'{self.title}\n\nMake sure to support the streamers in the video!\n{credit}'
+
+
+def validate_language(language):
+    if language not in VALID_LANGUAGES:
+        raise ValueError(f'Language {language} is not supported. Please use one of the following: {VALID_LANGUAGES}')
         
 
 def main():
     args = cli.start()
+    validate_language(args.language)
     creds = twitch.get_credentials()
 
     # Go through oauth flow before fetching clips
-    yt_service = yt.get_authenticated_service(YT_SECRETS_PATH)
-    clips = twitch.get_clips(creds, args.game, args.past_days, args.num_clips, args.first)
+    yt_service = yt.get_authenticated_service()
+    clips = twitch.get_clips(args.language, creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.language, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
 

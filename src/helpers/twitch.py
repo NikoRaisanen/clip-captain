@@ -3,7 +3,7 @@ import os
 import json
 import datetime
 import socket
-from config import *
+from config import TWITCH_SECRETS_PATH, CLIP_PATH
 
 # Data structure for each individual clip
 class Clip:

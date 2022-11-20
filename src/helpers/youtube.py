@@ -7,11 +7,12 @@ from datetime import datetime
 import os
 import socket
 from pathlib import Path
+from config import YT_SECRETS_PATH
 
 
-def get_authenticated_service(creds_path):
+def get_authenticated_service():
     """Local oauth flow, returns authenticated youtube service object"""    
-    CLIENT_SECRET_FILE = creds_path
+    CLIENT_SECRET_FILE = YT_SECRETS_PATH
     API_NAME = 'youtube'
     API_VERSION = 'v3'
     SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
