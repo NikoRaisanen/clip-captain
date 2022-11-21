@@ -18,3 +18,6 @@ FINAL_VID_PATH = os.path.join(os.getcwd(), 'finalVideos')
 
 # Language options of twitch clips
 VALID_LANGUAGES = ['en', 'es', 'fr', 'ru', 'ko', 'sv', 'pt', 'da']
+
+# Max number of requests to send to twitch api
+MAX_TWITCH_API_CALLS = 10

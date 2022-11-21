@@ -64,11 +64,10 @@ def main():
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.language, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
 
-    # TODO: can we abstract vid_path out to the config file?
     vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename, args.game)
     vid.filename = vid_path
 
-    yt.upload_video(yt_service, vid)
+    # yt.upload_video(yt_service, vid)
     
     ### Games to start automating
     # OW 2 (multiple languages)

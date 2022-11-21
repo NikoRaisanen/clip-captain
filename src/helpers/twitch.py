@@ -2,8 +2,7 @@ import requests
 import os
 import json
 import datetime
-import socket
-from config import TWITCH_SECRETS_PATH, CLIP_PATH
+from config import TWITCH_SECRETS_PATH, CLIP_PATH, MAX_TWITCH_API_CALLS
 
 # Data structure for each individual clip
 class Clip:
@@ -88,9 +87,7 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
     Returns list of Clip objects that contains the following info for
     each video clip: filename, download link, and name of creator
     """
-    # TODO: allow multi-language support
-    ### Api uses ISO 639-1 language codes
-    # https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
+    
     # TODO: allow a custom date range for clips, not only pastDays
     print(f'Language to be used is: {language}')
     time_now = datetime.datetime.now()
@@ -103,6 +100,9 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
 
     # Keep paginating through twitch clips API until 20 valid clips
     while len(clips) < num_clips:
+        if counter >= MAX_TWITCH_API_CALLS:
+            print('Max number of API calls reached')
+            break
         counter += 1
         print(f'Query #{counter} for valid clips')
         clipsAPI = 'https://api.twitch.tv/helix/clips'
@@ -111,26 +111,22 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
         r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
         data = r.json()
 
-        # Take the top 20 clips returned by clips api
-        if language is None:
-            raise ValueError('Language must be explicitly set')
-        else:
-            for item in data['data']:
-                if item['language'] != language:
-                    continue
-                if len(clips) >= num_clips:
-                    break
-                cursor = data['pagination']['cursor']
-                creator = item['broadcaster_name']
-                if creator not in clips_per_creator:
-                    clips_per_creator[creator] = 1
-                else:
-                    clips_per_creator[creator] += 1
+        for item in data['data']:
+            if item['language'] != language:
+                continue
+            if len(clips) >= num_clips:
+                break
+            cursor = data['pagination']['cursor']
+            creator = item['broadcaster_name']
+            if creator not in clips_per_creator:
+                clips_per_creator[creator] = 1
+            else:
+                clips_per_creator[creator] += 1
 
-                filename = f'{creator}{clips_per_creator[creator]}.mp4'
-                download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
-                clip = Clip(download_link, creator, filename)
-                clips.append(clip)
+            filename = f'{creator}{clips_per_creator[creator]}.mp4'
+            download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
+            clip = Clip(download_link, creator, filename)
+            clips.append(clip)
     
 
     print('Done getting clip info...')
