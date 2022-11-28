@@ -112,10 +112,12 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
         data = r.json()
 
         for item in data['data']:
+            print(item['language'])
             if item['language'] != language:
                 continue
             if len(clips) >= num_clips:
                 break
+            
             cursor = data['pagination']['cursor']
             creator = item['broadcaster_name']
             if creator not in clips_per_creator:
@@ -123,6 +125,7 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
             else:
                 clips_per_creator[creator] += 1
 
+            print('clip found')
             filename = f'{creator}{clips_per_creator[creator]}.mp4'
             download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
             clip = Clip(download_link, creator, filename)

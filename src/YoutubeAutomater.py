@@ -62,12 +62,14 @@ def main():
     yt_service = yt.get_authenticated_service()
     clips = twitch.get_clips(args.language, creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
-    vid = Video(args.game, args.video_title, args.language, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
+    # def __init__(self, game_name, language, title, thumbnail, tags, description, privacy_status, streamers=None, clips=None):
+    vid = Video(args.game, args.language,  args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
+    print(vid)
 
     vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename, args.game)
     vid.filename = vid_path
 
-    # yt.upload_video(yt_service, vid)
+    yt.upload_video(yt_service, vid)
     
     ### Games to start automating
     # OW 2 (multiple languages)
