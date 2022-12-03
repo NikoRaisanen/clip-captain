@@ -2,7 +2,7 @@ import os
 
 
 # Path to youtube api keys
-YT_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json') # rename to 
+YT_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json')
 
 # Path to twitch api keys
 TWITCH_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'twitch_creds.json')

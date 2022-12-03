@@ -59,7 +59,7 @@ def main():
     creds = twitch.get_credentials()
 
     # Go through oauth flow before fetching clips
-    # yt_service = yt.get_authenticated_service()
+    yt_service = yt.get_authenticated_service()
     clips = twitch.get_clips(args.language, creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     # def __init__(self, game_name, language, title, thumbnail, tags, description, privacy_status, streamers=None, clips=None):
@@ -77,7 +77,6 @@ def main():
     # Crypto
 
 if __name__ == "__main__":
-    # Sample Usage: `.\src\YoutubeAutomater.py -g 'Just Chatting' -n 15
-    # -vt 'Twitch Just Chatting | Best Moments of the Week #1'
-    # -t 'just chatting' 'twitch' 'best' 'best of' 'best just chatting' 'twitch just chatting' 'compilation' -p 'public'`
+    # Sample Usage:
+    # .\src\YoutubeAutomater.py -g 'Just Chatting' -n 15 -vt 'Twitch Just Chatting | Best Moments of the Week #1' -t 'just chatting' 'twitch' 'best' 'best of' 'best just chatting' 'twitch just chatting' 'compilation' -p 'public'
     main()
