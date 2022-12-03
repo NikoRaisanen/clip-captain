@@ -39,7 +39,7 @@ def upload_video(service, video):
             'categoryId': '20',
             'description': video.description,
             'tags': video.tags,
-            'defaultLanguage': 'en'
+            'defaultLanguage': video.language,
         },
         'status': {
             'privacyStatus': video.privacy_status,

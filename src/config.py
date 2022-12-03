@@ -2,7 +2,7 @@ import os
 
 
 # Path to youtube api keys
-YT_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json') # rename to 
+YT_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json')
 
 # Path to twitch api keys
 TWITCH_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'twitch_creds.json')
@@ -18,3 +18,6 @@ FINAL_VID_PATH = os.path.join(os.getcwd(), 'finalVideos')
 
 # Language options of twitch clips
 VALID_LANGUAGES = ['en', 'es', 'fr', 'ru', 'ko', 'sv', 'pt', 'da']
+
+# Max number of requests to send to twitch api
+MAX_TWITCH_API_CALLS = 500
