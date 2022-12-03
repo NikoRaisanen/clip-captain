@@ -82,6 +82,7 @@ def get_game_id(creds, name):
 
 
 # first param must be <= 50
+# TODO: Add support for pagination
 def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None):
     """
     Returns list of Clip objects that contains the following info for
@@ -107,9 +108,11 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
         print(f'Query #{counter} for valid clips')
         clipsAPI = 'https://api.twitch.tv/helix/clips'
         PARAMS = {'game_id': game_id, 'started_at': start_date, 'first': first, 'after': cursor}
+        print(f'PARAMS: {PARAMS}')
         HEADERS = {'Client-Id': creds['client_id'], 'Authorization': f'Bearer {creds["bearer_access_token"]}'}
         r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
         data = r.json()
+        cursor = data['pagination']['cursor']
 
         for item in data['data']:
             print(item['language'])
@@ -118,7 +121,6 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
             if len(clips) >= num_clips:
                 break
             
-            cursor = data['pagination']['cursor']
             creator = item['broadcaster_name']
             if creator not in clips_per_creator:
                 clips_per_creator[creator] = 1
