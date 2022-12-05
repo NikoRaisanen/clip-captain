@@ -2,7 +2,7 @@ import os
 
 
 # Path to youtube api keys
-YT_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json') # rename to 
+YT_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'youtube_creds.json')
 
 # Path to twitch api keys
 TWITCH_SECRETS_PATH = os.path.join(os.getcwd(), 'src', 'secrets', 'twitch_creds.json')
@@ -21,3 +21,5 @@ VALID_LANGUAGES = ['en', 'es', 'fr', 'ru', 'ko', 'sv', 'pt', 'da']
 
 # Max number of clips to use from a single creator. Set to None to use all clips
 CLIPS_PER_CREATOR = 1
+# Max number of requests to send to twitch api
+MAX_TWITCH_API_CALLS = 500

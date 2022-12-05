@@ -2,7 +2,7 @@ import requests
 import os
 import json
 import datetime
-from config import TWITCH_SECRETS_PATH, CLIP_PATH, CLIPS_PER_CREATOR
+from config import TWITCH_SECRETS_PATH, CLIP_PATH, MAX_TWITCH_API_CALLS, CLIPS_PER_CREATOR
 
 # Data structure for each individual clip
 class Clip:
