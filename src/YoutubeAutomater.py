@@ -21,7 +21,6 @@ class Video:
         self.description = description
         self.privacy_status = privacy_status
         self.clips = clips
-        # filename is dynamically set
         self.filename = f'{game_name}.mp4'
 
     def __str__(self):
@@ -59,7 +58,7 @@ def main():
     creds = twitch.get_credentials()
 
     # Go through oauth flow before fetching clips
-    yt_service = yt.get_authenticated_service()
+    # yt_service = yt.get_authenticated_service()
     clips = twitch.get_clips(args.language, creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     vid = Video(args.game, args.video_title, args.language, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)

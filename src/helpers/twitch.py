@@ -2,8 +2,7 @@ import requests
 import os
 import json
 import datetime
-import socket
-from config import TWITCH_SECRETS_PATH, CLIP_PATH
+from config import TWITCH_SECRETS_PATH, CLIP_PATH, CLIPS_PER_CREATOR
 
 # Data structure for each individual clip
 class Clip:
@@ -81,56 +80,84 @@ def get_game_id(creds, name):
     except Exception:
         raise KeyError(f'Cannot find game id for {name}, try adding or removing spaces')
 
-
 # first param must be <= 50
+# TODO: Add support for pagination
 def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None):
     """
     Returns list of Clip objects that contains the following info for
     each video clip: filename, download link, and name of creator
     """
-    # TODO: allow multi-language support
-    ### Api uses ISO 639-1 language codes
-    # https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
-    # TODO: allow a custom date range for clips, not only pastDays
-    print(f'Language to be used is: {language}')
-    time_now = datetime.datetime.now()
-    start_date = time_now - datetime.timedelta(past_days)
-    start_date = start_date.isoformat('T') + 'Z'
-
     counter = 0
     clips = []
     clips_per_creator = {}
 
-    # Keep paginating through twitch clips API until 20 valid clips
-    while len(clips) < num_clips:
-        counter += 1
-        print(f'Query #{counter} for valid clips')
-        clipsAPI = 'https://api.twitch.tv/helix/clips'
-        PARAMS = {'game_id': game_id, 'started_at': start_date, 'first': first, 'after': cursor}
-        HEADERS = {'Client-Id': creds['client_id'], 'Authorization': f'Bearer {creds["bearer_access_token"]}'}
-        r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
-        data = r.json()
 
-        # Take the top 20 clips returned by clips api
-        if language is None:
-            raise ValueError('Language must be explicitly set')
-        else:
-            for item in data['data']:
+    def process_api_response():
+        """Helper to process api response and return list of valid clips"""
+        for item in resp['data']:
+                print(item['language'])
                 if item['language'] != language:
                     continue
                 if len(clips) >= num_clips:
                     break
-                cursor = data['pagination']['cursor']
+                
                 creator = item['broadcaster_name']
                 if creator not in clips_per_creator:
                     clips_per_creator[creator] = 1
                 else:
                     clips_per_creator[creator] += 1
 
+                if CLIPS_PER_CREATOR and clips_per_creator.get(creator) > CLIPS_PER_CREATOR:
+                    continue
+
+                print('clip found')
                 filename = f'{creator}{clips_per_creator[creator]}.mp4'
                 download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
                 clip = Clip(download_link, creator, filename)
                 clips.append(clip)
+
+
+    # TODO: allow a custom date range for clips, not only pastDays
+    print(f'Language to be used is: {language}')
+    time_now = datetime.datetime.now()
+    start_date = time_now - datetime.timedelta(past_days)
+    start_date = start_date.isoformat('T') + 'Z'
+
+    # Keep paginating through twitch clips API until enough valid clips
+    while len(clips) < num_clips:
+        counter += 1
+        print(f'Query #{counter} for valid clips')
+        clipsAPI = 'https://api.twitch.tv/helix/clips'
+        PARAMS = {'game_id': game_id, 'started_at': start_date, 'first': first, 'after': cursor}
+        print(f'PARAMS: {PARAMS}')
+        HEADERS = {'Client-Id': creds['client_id'], 'Authorization': f'Bearer {creds["bearer_access_token"]}'}
+        r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
+        resp = r.json()
+        cursor = resp['pagination']['cursor']
+
+        # TODO: Can i put this loop into a function?
+        process_api_response(resp)
+        # for item in data['data']:
+        #     print(item['language'])
+        #     if item['language'] != language:
+        #         continue
+        #     if len(clips) >= num_clips:
+        #         break
+            
+        #     creator = item['broadcaster_name']
+        #     if creator not in clips_per_creator:
+        #         clips_per_creator[creator] = 1
+        #     else:
+        #         clips_per_creator[creator] += 1
+
+        #     if CLIPS_PER_CREATOR and clips_per_creator.get(creator) > CLIPS_PER_CREATOR:
+        #         continue
+
+        #     print('clip found')
+        #     filename = f'{creator}{clips_per_creator[creator]}.mp4'
+        #     download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
+        #     clip = Clip(download_link, creator, filename)
+        #     clips.append(clip)
     
 
     print('Done getting clip info...')
@@ -157,7 +184,7 @@ def download_clips(clips, game_name):
             fp.write(r.content)
             print(f'Downloading clip {counter} of {len(clips)} to {os.path.join(download_path, clip.filename)}')
 
-    
+# TODO: Only do 1 clip per creator... easy way to avoid duplicate clips
 def get_clips(language, creds=None, game_name=None, past_days=7, num_clips=20, first=20):
     """Wrapper function to perform all Twitch functionality"""
     game_id = get_game_id(creds, game_name)
