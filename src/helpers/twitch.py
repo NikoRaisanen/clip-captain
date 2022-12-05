@@ -2,7 +2,7 @@ import requests
 import os
 import json
 import datetime
-from config import TWITCH_SECRETS_PATH, CLIP_PATH, MAX_TWITCH_API_CALLS, CLIPS_PER_CREATOR
+from config import TWITCH_SECRETS_PATH, CLIP_PATH, CLIPS_PER_CREATOR
 
 # Data structure for each individual clip
 class Clip:
@@ -80,6 +80,7 @@ def get_game_id(creds, name):
     except Exception:
         raise KeyError(f'Cannot find game id for {name}, try adding or removing spaces')
 
+
 # first param must be <= 50
 # TODO: Add support for pagination
 def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None):
@@ -92,12 +93,13 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
     clips_per_creator = {}
 
 
-    def process_api_response():
-        """Helper to process api response and return list of valid clips"""
+    def process_api_response(resp):
+        """Helper to process api response and append to list of valid clips"""
         for item in resp['data']:
-                print(item['language'])
+                # skip clip if not target language
                 if item['language'] != language:
                     continue
+                # break when enough clips have been found
                 if len(clips) >= num_clips:
                     break
                 
@@ -106,11 +108,10 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
                     clips_per_creator[creator] = 1
                 else:
                     clips_per_creator[creator] += 1
-
+                
                 if CLIPS_PER_CREATOR and clips_per_creator.get(creator) > CLIPS_PER_CREATOR:
                     continue
 
-                print('clip found')
                 filename = f'{creator}{clips_per_creator[creator]}.mp4'
                 download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
                 clip = Clip(download_link, creator, filename)
@@ -118,7 +119,6 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
 
 
     # TODO: allow a custom date range for clips, not only pastDays
-    print(f'Language to be used is: {language}')
     time_now = datetime.datetime.now()
     start_date = time_now - datetime.timedelta(past_days)
     start_date = start_date.isoformat('T') + 'Z'
@@ -134,31 +134,7 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
         r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
         resp = r.json()
         cursor = resp['pagination']['cursor']
-
-        # TODO: Can i put this loop into a function?
         process_api_response(resp)
-        # for item in data['data']:
-        #     print(item['language'])
-        #     if item['language'] != language:
-        #         continue
-        #     if len(clips) >= num_clips:
-        #         break
-            
-        #     creator = item['broadcaster_name']
-        #     if creator not in clips_per_creator:
-        #         clips_per_creator[creator] = 1
-        #     else:
-        #         clips_per_creator[creator] += 1
-
-        #     if CLIPS_PER_CREATOR and clips_per_creator.get(creator) > CLIPS_PER_CREATOR:
-        #         continue
-
-        #     print('clip found')
-        #     filename = f'{creator}{clips_per_creator[creator]}.mp4'
-        #     download_link = f'{item["thumbnail_url"].split("-preview-")[0]}.mp4'
-        #     clip = Clip(download_link, creator, filename)
-        #     clips.append(clip)
-    
 
     print('Done getting clip info...')
     return clips
@@ -184,7 +160,7 @@ def download_clips(clips, game_name):
             fp.write(r.content)
             print(f'Downloading clip {counter} of {len(clips)} to {os.path.join(download_path, clip.filename)}')
 
-# TODO: Only do 1 clip per creator... easy way to avoid duplicate clips
+
 def get_clips(language, creds=None, game_name=None, past_days=7, num_clips=20, first=20):
     """Wrapper function to perform all Twitch functionality"""
     game_id = get_game_id(creds, game_name)

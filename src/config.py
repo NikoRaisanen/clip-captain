@@ -21,5 +21,3 @@ VALID_LANGUAGES = ['en', 'es', 'fr', 'ru', 'ko', 'sv', 'pt', 'da']
 
 # Max number of clips to use from a single creator. Set to None to use all clips
 CLIPS_PER_CREATOR = 1
-# Max number of requests to send to twitch api
-MAX_TWITCH_API_CALLS = 500
