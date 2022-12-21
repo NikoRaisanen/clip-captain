@@ -1,11 +1,12 @@
-import requests
 import os
 import json
 import datetime
+import requests
 from config import TWITCH_SECRETS_PATH, CLIP_PATH, CLIPS_PER_CREATOR
 
 # Data structure for each individual clip
 class Clip:
+    """Stores data for each twitch clip"""
     def __init__(self, download_link, streamer_name, filename):
         self.download_link = download_link
         self.streamer_name = streamer_name
@@ -13,13 +14,14 @@ class Clip:
 
 
 def get_credentials():
+    """Authenticate with twitch api"""
     current_creds = {}
     try:
         with open(TWITCH_SECRETS_PATH, 'r', encoding='utf-8') as fp:
             current_creds = json.load(fp)
     except FileNotFoundError:
         raise FileNotFoundError(f'Please define client_id and client_secret in {TWITCH_SECRETS_PATH} to authenticate with the Twitch api')
-        
+
     if not current_creds.get('client_id'):
         raise KeyError(f'No client_id property found in {TWITCH_SECRETS_PATH}')
     if not current_creds.get('client_secret'):
@@ -34,7 +36,7 @@ def get_credentials():
         r = requests.get(url=validate_endpoint, headers=HEADERS)
         if r.status_code == 200:
             return current_creds
-    
+
     # if oauth token not valid, get a new one
     new_oauth_token = get_oauth_token(current_creds)
     current_creds['bearer_access_token'] = new_oauth_token
@@ -43,7 +45,7 @@ def get_credentials():
 
 
 def update_bearer(bearer):
-    """update bearer token in credentials file"""
+    """Update bearer token in credentials file"""
     print('Generating new bearer access token')
     curr = None
     with open(TWITCH_SECRETS_PATH, 'r') as fp:
@@ -56,6 +58,7 @@ def update_bearer(bearer):
         json.dump(fp=fp, obj=curr)
 
 def get_oauth_token(creds):
+    """Get oauth token"""
     oauth_endpoint = 'https://id.twitch.tv/oauth2/token'
     PARAMS = {
         'client_id': creds['client_id'],
@@ -141,6 +144,7 @@ def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 2
 
 
 def get_creator_names(clips):
+    """Unpack streamer name from clips list"""
     return [x.streamer_name for x in clips]
 
 

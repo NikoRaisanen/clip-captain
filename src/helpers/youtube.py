@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta
+"""Module that handles user consent and youtube api"""
+import socket
 from moviepy.editor import *
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
-from datetime import datetime
-import os
-import socket
-from pathlib import Path
 from config import YT_SECRETS_PATH
+
+
+socket.setdefaulttimeout(100000)
 
 
 def get_authenticated_service():
@@ -29,7 +29,6 @@ def get_authenticated_service():
 
 def upload_video(service, video):
     """Takes in authenticated yt service and custom video class, uploads video to youtube"""
-    socket.setdefaulttimeout(100000)
     if not video.description:
         video.set_default_description()
 
@@ -68,3 +67,4 @@ def upload_video(service, video):
         print(f'{video.thumbnail} could not be found, not updating thumbnail...')
 
     print('Upload complete!')
+    

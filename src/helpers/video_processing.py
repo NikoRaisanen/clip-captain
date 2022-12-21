@@ -1,6 +1,5 @@
+"""Module that handles video and text generation"""
 import os
-import socket
-import requests, json
 from moviepy.editor import *
 from config import CLIP_PATH, DEFAULT_TRANSITION_PATH, FINAL_VID_PATH
 
@@ -31,7 +30,7 @@ def create_video(videos, transition, filename):
     transition = transition.subclip(0, -1)
     print('Beginning to concatenate video clips...')
     final = concatenate_videoclips(videos, transition=transition, method='compose')
-    
+
     if not os.path.exists(FINAL_VID_PATH):
         os.mkdir('finalVideos')
     # TODO: explore using more threads to speed up the process
