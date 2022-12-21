@@ -1,12 +1,9 @@
-from datetime import datetime, timedelta
+"""Module that handles user consent and youtube api"""
+import socket
 from moviepy.editor import *
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
-from datetime import datetime
-import os
-import socket
-from pathlib import Path
 from config import YT_SECRETS_PATH
 
 
@@ -70,3 +67,4 @@ def upload_video(service, video):
         print(f'{video.thumbnail} could not be found, not updating thumbnail...')
 
     print('Upload complete!')
+    
