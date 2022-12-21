@@ -10,6 +10,9 @@ from pathlib import Path
 from config import YT_SECRETS_PATH
 
 
+socket.setdefaulttimeout(100000)
+
+
 def get_authenticated_service():
     """Local oauth flow, returns authenticated youtube service object"""    
     CLIENT_SECRET_FILE = YT_SECRETS_PATH
@@ -29,7 +32,6 @@ def get_authenticated_service():
 
 def upload_video(service, video):
     """Takes in authenticated yt service and custom video class, uploads video to youtube"""
-    socket.setdefaulttimeout(100000)
     if not video.description:
         video.set_default_description()
 
