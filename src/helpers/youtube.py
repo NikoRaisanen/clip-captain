@@ -1,12 +1,15 @@
 """Module that handles user consent and youtube api"""
 import socket
 from moviepy.editor import *
+from google.oauth2 import id_token
+from google.auth.transport import requests
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from config import YT_SECRETS_PATH
 
 
+request = requests.Request()
 socket.setdefaulttimeout(100000)
 
 
@@ -15,14 +18,12 @@ def get_authenticated_service():
     CLIENT_SECRET_FILE = YT_SECRETS_PATH
     API_NAME = 'youtube'
     API_VERSION = 'v3'
-    SCOPES = ['https://www.googleapis.com/auth/youtube.upload']
-    # Authenticate on each request for web version
+    SCOPES = ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtubepartner-channel-audit']
     flow = InstalledAppFlow.from_client_secrets_file(
         CLIENT_SECRET_FILE,
         scopes=SCOPES)
     print('Select the google account where you would like to upload the video')
     credentials = flow.run_local_server()
-
     service = build(API_NAME, API_VERSION, credentials=credentials)
     return service
 
@@ -67,4 +68,12 @@ def upload_video(service, video):
         print(f'{video.thumbnail} could not be found, not updating thumbnail...')
 
     print('Upload complete!')
+    
+
+def get_account_info(service):
+    r = service.channels().list(
+        part="snippet,contentDetails,statistics",
+        mine=True
+    )
+    return r.execute()
     

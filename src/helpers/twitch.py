@@ -85,7 +85,6 @@ def get_game_id(creds, name):
 
 
 # first param must be <= 50
-# TODO: Add support for pagination
 def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None):
     """
     Returns list of Clip objects that contains the following info for

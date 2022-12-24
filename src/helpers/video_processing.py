@@ -33,7 +33,6 @@ def create_video(videos, transition, filename):
 
     if not os.path.exists(FINAL_VID_PATH):
         os.mkdir('finalVideos')
-    # TODO: explore using more threads to speed up the process
     final.write_videofile(os.path.join(FINAL_VID_PATH, filename), fps=60, bitrate="6000k", threads=8)
     return os.path.join(FINAL_VID_PATH, filename)
 

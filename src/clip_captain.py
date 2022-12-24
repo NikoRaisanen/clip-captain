@@ -61,7 +61,6 @@ def validate_language(language):
         
 
 # TODO: Create bash script to automatically run the program for a given user
-# TODO: Configure a python linter
 def main():
     args = cli.start()
     validate_language(args.language)
