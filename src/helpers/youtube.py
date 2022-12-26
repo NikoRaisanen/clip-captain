@@ -85,4 +85,4 @@ def vid_info_from_json(id):
         data = json.load(fp)
     
     info = [x for x in data['channels'] if x.get('id') == id][0]
-    return info
+    return info.get('state')

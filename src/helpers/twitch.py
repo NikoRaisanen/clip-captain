@@ -85,7 +85,7 @@ def get_game_id(creds, name):
 
 
 # first param must be <= 50
-def get_clip_info(language, creds=None, game_id=None, past_days=7, num_clips = 20, first = 20, cursor = None):
+def get_clip_info(creds=None, language=None, game_id=None, past_days=7, num_clips = 20, cursor = None):
     """
     Returns list of Clip objects that contains the following info for
     each video clip: filename, download link, and name of creator
@@ -164,9 +164,9 @@ def download_clips(clips, game_name):
             print(f'Downloading clip {counter} of {len(clips)} to {os.path.join(download_path, clip.filename)}')
 
 
-def get_clips(language, creds=None, game_name=None, past_days=7, num_clips=20, first=20):
+def get_clips(creds=None, language=None, game_name=None, past_days=7, num_clips=20):
     """Wrapper function to perform all Twitch functionality"""
     game_id = get_game_id(creds, game_name)
-    clips = get_clip_info(language, creds, game_id, past_days, num_clips, first)
+    clips = get_clip_info(creds, language, game_id, past_days, num_clips)
     download_clips(clips, game_name)
     return clips

@@ -66,10 +66,19 @@ def main():
     validate_language(args.language)
     creds = twitch.get_credentials()
 
+    # this only changes how we get the YT credentials
+    if args.account_id:
+        yt_service = yt.get_authenticated_service()
+        v = yt.vid_info_from_json(args.account_id)
+        clips = twitch.get_clips(creds, v['language'], v['game'], v['pastDays'], v['numClips'])
+        # create video obj from config
+    else:
+        yt_service = yt.get_authenticated_service()
+        clips = twitch.get_clips(creds, args.language, args.game, args.past_days, args.num_clips)
+        pass
+
     # Go through oauth flow before fetching clips
-    yt_service = yt.get_authenticated_service()
     # TODO: Reduce num args that go into twitch.get_clips
-    clips = twitch.get_clips(args.language, creds, args.game, args.past_days, args.num_clips, args.first)
     creators = twitch.get_creator_names(clips)
     # TODO: Reduce num args that go into Video constructor
     vid = Video(args.game, args.language,  args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
@@ -83,5 +92,5 @@ def main():
 
 if __name__ == "__main__":
     # Sample Usage:
-    # .\src\clip_captain.py -g 'Just Chatting' -n 15 -vt 'Twitch Just Chatting | Best Moments of the Week #1' -t 'just chatting' 'twitch' 'best' 'best of' 'best just chatting' 'twitch just chatting' 'compilation' -p 'public'
+    # python ./src/clip_captain.py -g 'Just Chatting' -n 15 -vt 'Twitch Just Chatting | Best Moments of the Week #1' -t 'just chatting' 'twitch' 'best' 'best of' 'best just chatting' 'twitch just chatting' 'compilation' -p 'public'
     main()

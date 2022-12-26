@@ -1,0 +1,30 @@
+{
+    "channels": [
+        {
+            "id": "UC1yUpxgq7sXy8a5sFFBBG3g",
+            "name": "Twitch Just Chatting Daily Dose",
+            "state": {
+                "game": "Just Chatting",
+                "numClips": 12,
+                "language": "en",
+                "pastDays": 1,
+                "title": "Twitch Just Chatting | Best Moments of the Week #1",
+                "tags": ["just chatting", "twitch", "best", "best of", "best just chatting", "twitch just chatting", "compilation"],
+                "privacy": "public"
+            }
+        },
+        {
+            "id": "UCcuLpIZNxaCWUwup2tR59xA",
+            "name": "Fortnite Factor",
+            "state": {
+                "game": "Fortnite",
+                "numClips": 12,
+                "language": "en",
+                "pastDays": 7,
+                "title": "Top Twitch Fortnite Clips of the Week #1",
+                "tags": ["fortnite", "twitch", "best", "best of", "best fortnite", "twitch fortnite", "compilation"],
+                "privacy": "public"
+            }
+        }
+    ]
+}
