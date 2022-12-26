@@ -13,19 +13,33 @@ request = requests.Request()
 socket.setdefaulttimeout(100000)
 
 
-def get_authenticated_service():
-    """Local oauth flow, returns authenticated youtube service object"""    
+def get_oauth_creds(id=None):
+    """Local oauth flow, returns authenticated youtube service object"""
+    if id:
+        # read creds from pickle file and return
+        pass
+
     CLIENT_SECRET_FILE = YT_SECRETS_PATH
-    API_NAME = 'youtube'
-    API_VERSION = 'v3'
     SCOPES = ['https://www.googleapis.com/auth/youtube.upload', 'https://www.googleapis.com/auth/youtubepartner-channel-audit']
     flow = InstalledAppFlow.from_client_secrets_file(
         CLIENT_SECRET_FILE,
         scopes=SCOPES)
     print('Select the google account where you would like to upload the video')
     credentials = flow.run_local_server()
+    return credentials
+   
+
+def build_service(credentials):
+    API_NAME = 'youtube'
+    API_VERSION = 'v3'
     service = build(API_NAME, API_VERSION, credentials=credentials)
     return service
+
+
+def oauth_flow(id=None):
+    """Get oauth creds and build service object"""
+    creds = get_oauth_creds(id)
+    return build_service(creds)
 
 
 def upload_video(service, video):
