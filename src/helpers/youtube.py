@@ -1,12 +1,12 @@
 """Module that handles user consent and youtube api"""
+import json
 import socket
 from moviepy.editor import *
-from google.oauth2 import id_token
 from google.auth.transport import requests
 from googleapiclient.http import MediaFileUpload
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
-from config import YT_SECRETS_PATH
+from config import YT_SECRETS_PATH, STATE_PATH
 
 
 request = requests.Request()
@@ -76,4 +76,13 @@ def get_account_info(service):
         mine=True
     )
     return r.execute()
+
+
+def vid_info_from_json(id):
+    """Read from json to upload video"""
+    data = {}
+    with open(STATE_PATH, 'r') as fp:
+        data = json.load(fp)
     
+    info = [x for x in data['channels'] if x.get('id') == id][0]
+    return info
