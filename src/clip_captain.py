@@ -50,21 +50,43 @@ class Video:
         self.description = f"""{self.title}\n
             Make sure to support the streamers in the video!
             {credit}"""
-
-
-def validate_language(language):
-    """Raise error if entered language is not supported"""
-    if language not in VALID_LANGUAGES:
-        raise ValueError(
-            f'Language {language} is not supported. Please use one of the following: {VALID_LANGUAGES}'
-        )
         
+
+def validate_cli_args(args):
+    """Validate cli args, bypass if account_id is provided"""
+    if args.account_id:
+        return
+    if not args.game:
+        raise ValueError('Game name must be specified with -g or --game')
+    if not args.video_title:
+        raise ValueError('Video title must be specified with -vt or --video-title')
+    if args.language not in VALID_LANGUAGES:
+        raise ValueError(f'{args.language} is not supported. Options: {VALID_LANGUAGES}')
+
+
+def normalize_args(args):
+    """Return normalized args"""
+    if args.account_id:
+        norm = yt.vid_info_from_json(args.account_id)
+        return norm
+    norm = {
+        'game': args.game,
+        'numClips': args.num_clips,
+        'language': args.language,
+        'pastDays': args.past_days,
+        'title': args.video_title,
+        'tags': args.tags,
+        'privacy': args.privacy
+    }
+    return norm
+  
 
 # TODO: Create bash script to automatically run the program for a given user
 # TODO: Create wrapper fn for each of the 2 cases below (programmatic vs ad-hoc)
 def main():
     args = cli.start()
-    validate_language(args.language)
+    validate_cli_args(args)
+    na = normalize_args(args)
     twitch_auth = twitch.get_credentials()
 
     clips = None
@@ -94,5 +116,5 @@ def main():
 
 if __name__ == "__main__":
     # Sample Usage:
-    # python ./src/clip_captain.py -g 'Just Chatting' -n 15 -vt 'Twitch Just Chatting | Best Moments of the Week #1' -t 'just chatting' 'twitch' 'best' 'best of' 'best just chatting' 'twitch just chatting' 'compilation' -p 'public'
+    # python ./src/clip_captain.py -g 'Just Chatting' -n 15 -vt 'Twitch Just Chatting | Best Moments of the Week #1' -t 'just chatting' 'twitch' 'best' 'best of' 'best just chatting' 'twitch just chatting' 'compilation' -p 'public' -pd 7
     main()

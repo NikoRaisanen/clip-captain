@@ -130,7 +130,7 @@ def get_clip_info(creds=None, language=None, game_id=None, past_days=7, num_clip
         counter += 1
         print(f'Query #{counter} for valid clips')
         clipsAPI = 'https://api.twitch.tv/helix/clips'
-        PARAMS = {'game_id': game_id, 'started_at': start_date, 'first': first, 'after': cursor}
+        PARAMS = {'game_id': game_id, 'started_at': start_date, 'first': 50, 'after': cursor}
         print(f'PARAMS: {PARAMS}')
         HEADERS = {'Client-Id': creds['client_id'], 'Authorization': f'Bearer {creds["bearer_access_token"]}'}
         r = requests.get(url=clipsAPI, params=PARAMS, headers=HEADERS)
