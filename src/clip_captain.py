@@ -65,10 +65,10 @@ def validate_cli_args(args):
 
 
 def normalize_args(args):
-    """Return normalized args"""
+    """Return normalized args as dict"""
     if args.account_id:
         norm = yt.vid_info_from_json(args.account_id)
-        return norm
+        return {**norm, 'id': args.account_id}
     norm = {
         'game': args.game,
         'numClips': args.num_clips,
@@ -76,39 +76,23 @@ def normalize_args(args):
         'pastDays': args.past_days,
         'title': args.video_title,
         'tags': args.tags,
-        'privacy': args.privacy
+        'privacy': args.privacy_status
     }
     return norm
   
 
 # TODO: Create bash script to automatically run the program for a given user
-# TODO: Create wrapper fn for each of the 2 cases below (programmatic vs ad-hoc)
 def main():
     args = cli.start()
     validate_cli_args(args)
     na = normalize_args(args)
+
     twitch_auth = twitch.get_credentials()
-
-    clips = None
-    yt_service = None
-    creators = None
-    vid = None
-    if args.account_id:
-        yt_service = yt.oauth_flow(args.account_id)
-        v = yt.vid_info_from_json(args.account_id)
-        clips = twitch.get_clips(twitch_auth, v['language'], v['game'], v['pastDays'], v['numClips'])
-        creators = twitch.get_creator_names(clips)
-        vid = Video(v['game'], v['language'], v['title'], None, v['tags'], None, v['privacy'], creators, clips)
-        vid_path = vid_p.finalize_video(clips, None, vid.filename, v['game'])
-
-
-    else:
-        yt_service = yt.oauth_flow()
-        clips = twitch.get_clips(twitch_auth, args.language, args.game, args.past_days, args.num_clips)
-        creators = twitch.get_creator_names(clips)
-        vid = Video(args.game, args.language,  args.video_title, args.thumbnail, args.tags, args.description, args.privacy_status, creators, clips)
-        vid_path = vid_p.finalize_video(clips, args.transition_media, vid.filename, args.game)
-
+    yt_service = yt.oauth_flow(na.get('id'))
+    clips = twitch.get_clips(twitch_auth, na['language'], na['game'], na['pastDays'], na['numClips'])
+    creators = twitch.get_creator_names(clips)
+    vid = Video(na['game'], na['language'], na['title'], None, na['tags'], None, na['privacy'], creators, clips)
+    vid_path = vid_p.finalize_video(clips, None, vid.filename, na['game'])
     vid.filename = vid_path
 
     yt.upload_video(yt_service, vid)
